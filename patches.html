@@ -463,12 +463,64 @@
                 SuperviveUtils.showLoading('patchNotesContainer');
                 try {
                     this.patchNotes = await this.patchDataManager.loadPatches();
+                    // Transform the data to match expected structure
+                    this.patchNotes = this.patchNotes.map(note => this.transformPatchData(note));
                     this.filteredNotes = [...this.patchNotes];
+                    SuperviveUtils.hideLoading('patchNotesContainer');
                     this.renderPatchNotes();
                 } catch (error) {
                     console.error('Error loading patch notes:', error);
+                    SuperviveUtils.hideLoading('patchNotesContainer');
                     this.showError('Failed to load patch notes');
                 }
+            }
+
+            transformPatchData(note) {
+                // Convert new JSON structure to old expected structure
+                const categories = [];
+                const content = {};
+                
+                if (note.changes) {
+                    Object.keys(note.changes).forEach(category => {
+                        if (note.changes[category] && note.changes[category].length > 0) {
+                            categories.push(category);
+                            
+                            if (category === 'hunters') {
+                                // Handle hunters specially - create proper hunter objects
+                                content[category] = note.changes[category].map(change => ({
+                                    name: this.extractHunterName(change.description),
+                                    role: 'fighter', // Default role - could be improved
+                                    image: `assets/images/hunters/${this.extractHunterName(change.description)}.png`,
+                                    changes: [change.description]
+                                }));
+                            } else {
+                                // Handle other categories as simple arrays
+                                content[category] = note.changes[category].map(change => change.description);
+                            }
+                        }
+                    });
+                }
+                
+                return {
+                    id: note.id,
+                    title: note.title,
+                    date: note.date,
+                    categories: categories,
+                    content: content
+                };
+            }
+
+            extractHunterName(description) {
+                // Try to extract hunter name from description
+                const hunterNames = ['Wukong', 'Crysta', 'Carbine', 'Saros', 'Joule', 'Myth', 'Elluna', 'Ghost', 'Jin', 'Felix', 'Brall', 'Shiv', 'Beebo', 'Bishop', 'Celeste', 'Eva', 'Hudson', 'Kingpin', 'Oath', 'Shrike', 'Void', 'Zeph'];
+                
+                for (const name of hunterNames) {
+                    if (description.toLowerCase().includes(name.toLowerCase())) {
+                        return name;
+                    }
+                }
+                
+                return 'Unknown';
             }
 
             async checkForUpdates() {
@@ -503,6 +555,17 @@
                 setTimeout(() => {
                     notification.remove();
                 }, 5000);
+            }
+
+            showError(message) {
+                const container = document.getElementById('patchNotesContainer');
+                container.innerHTML = `
+                    <div class="card" style="text-align: center; padding: 2rem;">
+                        <h3 style="color: var(--neon-pink); margin-bottom: 1rem;">Error Loading Patch Notes</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">${message}</p>
+                        <button class="btn" onclick="location.reload()">Try Again</button>
+                    </div>
+                `;
             }
 
             oldLoadPatchNotes() {
