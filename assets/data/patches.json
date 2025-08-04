@@ -1,0 +1,79 @@
+[
+  {
+    "id": "patch-1",
+    "title": "July 30 - Armory Balance Hotfix",
+    "date": "2025-07-30",
+    "version": "1.0.1",
+    "steamUrl": "https://store.steampowered.com/news/app/1283780",
+    "summary": "Prisma Gems from daily missions increased and weekend events introduced to support casual player progression.",
+    "changes": {
+      "hunters": [],
+      "equipment": [],
+      "systems": [
+        {
+          "description": "Prisma Gems from daily missions increased: 100 → 400 per mission (300% increase)",
+          "type": "buff"
+        },
+        {
+          "description": "Enhanced rewards to support casual player progression",
+          "type": "improvement"
+        },
+        {
+          "description": "Weekend Events: Double XP, Free Hunter Weekend, Prisma Boost",
+          "type": "new"
+        }
+      ],
+      "maps": [],
+      "modes": []
+    },
+    "rawContent": "We've heard your feedback about progression pacing and are making immediate improvements to support casual players..."
+  },
+  {
+    "id": "patch-2",
+    "title": "Version 1.0 - Global Launch",
+    "date": "2025-07-24",
+    "version": "1.0.0",
+    "steamUrl": "https://store.steampowered.com/news/app/1283780",
+    "summary": "Complete game overhaul with new Armory system, team size changes, and six new hunters added to the roster.",
+    "changes": {
+      "hunters": [
+        {
+          "description": "New hunters: Wukong, Crysta, Carbine, Saros, Joule, Myth",
+          "type": "new"
+        },
+        {
+          "description": "All existing hunters rebalanced for 3v3 gameplay",
+          "type": "rework"
+        }
+      ],
+      "equipment": [
+        {
+          "description": "Complete Armory system overhaul with new item categories",
+          "type": "rework"
+        },
+        {
+          "description": "New relic, grip, kick, and perk systems introduced",
+          "type": "new"
+        }
+      ],
+      "systems": [
+        {
+          "description": "Team size changed from 4 to 3 hunters for balanced gameplay",
+          "type": "change"
+        },
+        {
+          "description": "New progression system with Prisma Gems currency",
+          "type": "new"
+        }
+      ],
+      "maps": [
+        {
+          "description": "Map layouts adjusted for 3v3 team compositions",
+          "type": "change"
+        }
+      ],
+      "modes": []
+    },
+    "rawContent": "Welcome to SUPERVIVE 1.0! After months of testing and feedback, we're excited to launch the full version..."
+  }
+]

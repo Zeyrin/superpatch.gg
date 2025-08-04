@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunters - SUPERPATCH.GG</title>
+    <meta name="description" content="Complete SUPERVIVE hunter database with abilities, roles, and patch history for all 22 hunters.">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <style>
+        /* Hunter-specific styles only */
+        .abilities-preview {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .ability-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid var(--border-glow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .ability-icon:hover {
+            transform: scale(1.1);
+            border-color: var(--neon-mint);
+            box-shadow: 0 0 15px rgba(0, 255, 163, 0.4);
+        }
+
+        .hunter-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-hunter {
+            flex: 1;
+            text-align: center;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: 2px solid var(--border-glow);
+            border-radius: 15px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-hunter:hover, .btn-hunter.primary {
+            border-color: var(--neon-mint);
+            background: var(--neon-mint);
+            color: var(--dark-bg);
+        }
+
+        .btn-hunter.secondary:hover {
+            border-color: var(--electric-purple);
+            background: var(--electric-purple);
+            color: white;
+        }
+
+        .role-filters {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .role-filter {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 2px solid var(--border-glow);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .role-filter:hover, .role-filter.active {
+            border-color: var(--neon-mint);
+            background: var(--neon-mint);
+            color: var(--dark-bg);
+        }
+
+        /* Fix search bar to full width */
+        .search-wrapper {
+            flex: 1;
+            min-width: 300px;
+            width: 100%;
+        }
+
+        .hunter-stats {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            color: var(--neon-mint);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 90%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-glow);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--neon-pink);
+        }
+
+        .abilities-detailed {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .ability-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-glow);
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .ability-stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            background: rgba(0, 255, 163, 0.1);
+            border: 1px solid var(--neon-mint);
+            border-radius: 8px;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--neon-mint);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .stat-badge.mana {
+            border-color: var(--electric-purple);
+            background: rgba(155, 89, 182, 0.1);
+            color: var(--electric-purple);
+        }
+
+        .stat-badge.cooldown {
+            border-color: var(--neon-pink);
+            background: rgba(255, 20, 147, 0.1);
+            color: var(--neon-pink);
+        }
+
+        .stat-badge.damage {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.1);
+            color: #ff6b35;
+        }
+
+        .stat-icon {
+            font-size: 0.7rem;
+        }
+
+        .ability-upgrades {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .upgrades-title {
+            color: var(--neon-mint);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .upgrade-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-left: 3px solid;
+            border-radius: 4px;
+            padding: 0.4rem 0.6rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.8rem;
+            line-height: 1.3;
+        }
+
+        .upgrade-item.tier1 {
+            border-left-color: #9b59b6;
+        }
+
+        .upgrade-item.tier2 {
+            border-left-color: #e74c3c;
+        }
+
+        .upgrade-item.tier3 {
+            border-left-color: #f39c12;
+        }
+
+        .ability-card .ability-icon {
+            width: 60px;
+            height: 60px;
+            flex-shrink: 0;
+        }
+
+        .ability-details h4 {
+            color: var(--neon-mint);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .ability-details p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .ability-text {
+            color: var(--text-secondary);
+        }
+
+        .damage-value {
+            color: #ff6b35;
+            font-weight: 600;
+        }
+
+        .effect-text {
+            color: #4ecdc4;
+            font-weight: 500;
+        }
+
+        .mana-text {
+            color: var(--electric-purple);
+            font-weight: 500;
+        }
+
+        .status-effect {
+            color: #f39c12;
+            font-weight: 500;
+        }
+
+        .cooldown-text {
+            color: var(--neon-pink);
+            font-weight: 500;
+        }
+
+        .ability-type {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: var(--electric-purple);
+            color: white;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .patch-history {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-glow);
+        }
+
+        .patch-history h3 {
+            color: var(--neon-mint);
+            margin-bottom: 1rem;
+        }
+
+        .history-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-left: 4px solid var(--electric-purple);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .history-date {
+            color: var(--neon-pink);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-changes {
+            color: var(--text-secondary);
+            list-style: none;
+            padding: 0;
+        }
+
+        .history-changes li {
+            padding: 0.25rem 0;
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .history-changes li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--electric-purple);
+        }
+
+        @media (max-width: 768px) {
+            .hunters-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-wrapper {
+                min-width: auto;
+            }
+            
+            .role-filters {
+                justify-content: center;
+            }
+            
+            .hunter-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .abilities-preview {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-grid"></div>
+    
+    <header class="header">
+        <div class="header-content">
+            <div>
+                <a href="./" class="logo">SUPERPATCH.GG</a>
+                <div class="subtitle">SUPERVIVE Patch Notes Archive</div>
+            </div>
+            <nav class="nav-menu">
+                <a href="./" class="nav-link">Home</a>
+                <a href="patches.html" class="nav-link">Patch Notes</a>
+                <a href="hunters.html" class="nav-link active">Hunters</a>
+                <a href="armory.html" class="nav-link">Armory</a>
+                <a href="https://ko-fi.com/superpatchgg" target="_blank" class="coffee-btn">
+                    <span class="coffee-icon">☕</span>
+                    Buy me a coffee
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <section class="hero">
+            <h1 class="page-title">HUNTERS</h1>
+            <p class="page-subtitle">
+                Complete database of all 22 SUPERVIVE hunters<br>
+                Explore abilities, roles, and patch history for every character
+            </p>
+        </section>
+
+        <section class="filters-section">
+            <div class="filters-container">
+                <div class="search-wrapper">
+                    <input 
+                        type="text" 
+                        id="hunterSearch" 
+                        class="search-input" 
+                        placeholder="Search hunters by name, role, or abilities..."
+                    >
+                    <button class="search-clear" aria-label="Clear search" title="Clear search">×</button>
+                </div>
+                <div class="role-filters">
+                    <button class="role-filter active" data-role="all">All</button>
+                    <button class="role-filter" data-role="fighter">Fighter</button>
+                    <button class="role-filter" data-role="controller">Controller</button>
+                    <button class="role-filter" data-role="protector">Protector</button>
+                    <button class="role-filter" data-role="frontliner">Frontliner</button>
+                    <button class="role-filter" data-role="initiator">Initiator</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ad Spot: Between Content -->
+        <div class="ad-container ad-between-content">
+            <div class="ad-label">Advertisement</div>
+            <div class="ad-content">
+                <!-- Ad content will be inserted here -->
+                Banner Ad (728x90)
+            </div>
+        </div>
+
+        <section id="huntersContainer" class="hunters-container">
+            <!-- Hunters will be dynamically generated here -->
+        </section>
+    </main>
+
+    <!-- Ad Spot: Footer Banner -->
+    <div class="ad-container ad-footer-banner">
+        <div class="ad-label">Sponsored</div>
+        <div class="ad-content">
+            <!-- Footer banner ad -->
+            Footer Banner (728x90)
+        </div>
+    </div>
+
+    <!-- Hunter Detail Modal -->
+    <div id="hunterModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 id="modalHunterName"></h2>
+                    <div id="modalHunterRole" class="hunter-role"></div>
+                </div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalHunterContent"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 SUPERPATCH.GG - Unofficial SUPERVIVE patch notes archive</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+            Not affiliated with Theorycraft Games. All game content and images belong to their respective owners.
+        </p>
+    </footer>
+
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/ads.js"></script>
+    <script>
+        class HuntersManager {
+            constructor() {
+                this.hunters = [];
+                this.filteredHunters = [];
+                this.currentFilter = 'all';
+                this.currentSearch = '';
+                this.init();
+            }
+
+            init() {
+                this.loadHunters();
+                this.setupEventListeners();
+                this.setupSearchClear();
+                SuperviveUtils.setActiveNavLink('hunters.html');
+            }
+
+            setupSearchClear() {
+                SuperviveUtils.setupSearchClear('#hunterSearch', () => {
+                    this.currentSearch = '';
+                    this.filterAndRender();
+                });
+            }
+
+            setupEventListeners() {
+                const searchInput = document.getElementById('hunterSearch');
+                const roleFilters = document.querySelectorAll('.role-filter');
+
+                searchInput.addEventListener('input', (e) => {
+                    this.currentSearch = e.target.value.toLowerCase();
+                    this.filterAndRender();
+                });
+
+                roleFilters.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        roleFilters.forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentFilter = e.target.dataset.role;
+                        this.filterAndRender();
+                    });
+                });
+            }
+
+            loadHunters() {
+                this.hunters = [
+                    {
+                        name: 'Beebo',
+                        role: 'protector',
+                        description: 'Versatile support hunter with healing abilities and team utility mechanics.',
+                        portrait: 'assets/images/hunters/Beebo.png',
+                        abilities: {
+                            passive: { icon: 'beebo_P.png', name: 'Matterball', type: 'Passive', description: 'Beebo travels atop a miniaturized planet called a <span class="effect-text">Matterball</span>, allowing him to cross lava and other hazards without suffering negative effects. He is also <span class="effect-text">10% lighter</span> than other Hunters. All impulses affect him more.' },
+                            primary: { icon: 'beebo_lmb_1.png', name: 'Bat', type: 'Primary', description: '<span class="effect-text">TAP</span> to swing Beebo\'s bat, dealing <span class="damage-value">74</span> damage and applying a stacking <span class="status-effect">Slow</span>. The slow stacks up to 3 times.<br><br><span class="effect-text">HOLD</span> to charge a powerful swing that <span class="status-effect">knocks back</span> enemies and deals up to <span class="damage-value">185%</span> damage. At full charge, enemies knocked into walls are <span class="status-effect">Stunned</span>. Can be used to launch <span class="effect-text">Beeb-omb (Q)</span> and enemy Wisps. Can knock down trees.' },
+                            secondary: { icon: 'beebo_rmb.png', name: 'Zeep Zeep', type: 'Secondary', description: '<span class="effect-text">PRESS</span> to fire a Zeep from Beebo\'s slingshot, with variable damage and effects. After firing, Beebo readies the next Zeep at random.<br><br><span class="effect-text">HOLD</span> to cycle between Zeeps. Cannot cycle to SUPER Zeep.<br><br><span class="damage-value">Fire Zeep</span> - Creates a small burning zone, damaging and applying <span class="status-effect">Anti-Heal</span>.<br><br><span class="damage-value">Ice Zeep</span> - <span class="status-effect">Grounds</span> struck targets. Creates an ice platform when used over the Abyss.<br><br><span class="effect-text">Heal Zeep</span> - Fires a Zeep that heals allies. Hitting an enemy or wall bounces the Zeep to the ground, healing whoever picks it up. Creates a tree if the Zeep expires without being picked up.<br><br><span class="damage-value">Pull Zeep</span> - Deals no damage. Hitting an enemy <span class="status-effect">Pulls</span> them toward Beebo. Hitting terrain <span class="status-effect">Pulls</span> Beebo toward it.<br><br><span class="damage-value">SUPER Zeep</span> - An explosive Zeep that deals 3x damage and huge <span class="status-effect">knockback</span>. 1% chance to roll. <br><span class="mana-text">Mana Cost: 20</span> • <span class="cooldown-text">Cooldown: 1.4s</span>', upgrades: [{ tier: 2, description: '+25% Damage' }, { tier: 3, description: '-50% Cooldown' }, { tier: 4, description: 'Shots Cycle 40% Faster' }] },
+                            dash: { icon: 'beebo_dash.png', name: 'Shwoop', type: 'Dash', description: 'Beebo dodges forward, gaining a brief speed buff that decays over time. Has <span class="effect-text">2 Charges</span>. Speed buff does not stack. <br><span class="mana-text">Mana Cost: 10</span> • <span class="cooldown-text">Cooldown: 8s</span>', upgrades: [{ tier: 2, description: '-1s Cooldown' }, { tier: 3, description: '-1s Cooldown' }, { tier: 4, description: '-2s Cooldown' }] },
+                            ability: { icon: 'beebo_Q.png', name: 'Beeb-omb', type: 'Ability', description: '<span class="effect-text">PRESS</span> to throw a Beeb-omb that grows in size and damage over time. <span class="effect-text">PRESS again</span> to detonate, dealing up to <span class="damage-value">165</span> damage.<br><br>Strike Beeb-ombs with charged <span class="effect-text">Bat (LMB)</span> to launch.<br><br>Beeb-ombs bounce over impassable terrain.<br><br>Can be used to revive or stomp Wisps, capture Base Camps, or use Respawn Beacons.<br><br>Beebo and allies gain <span class="effect-text">+20% Movement Speed</span> nearby, and can bounce off the Beeb-omb by jumping on it.<br><br>Hitting an enemy refunds <span class="effect-text">20%</span> of the cooldown per target hit.<br><br>Bomb can be detonated while knocked.<br><br><span class="damage-value">Total Damage: 165</span><br><span class="mana-text">Mana Cost: 30</span> • <span class="cooldown-text">Cooldown: 0.5s</span>', upgrades: [{ tier: 2, description: '+30% Damage' }, { tier: 3, description: '+30% Damage' }, { tier: 4, description: 'Bomb Knocks Fully Resets Cooldown' }] },
+                            ultimate: { icon: 'beebo_R.png', name: 'Tonk Tonk!', type: 'Ultimate', description: 'Drive a kart that picks up enemies and allies in its path.<br><br>Enemies take <span class="damage-value">100</span> damage on hit and are <span class="status-effect">Stunned</span>.<br><br>Crashing into a wall <span class="status-effect">Stuns</span> and deals <span class="damage-value">100</span> damage to enemies who were carried along.<br><br>Turning reduces max speed.<br><br><span class="effect-text">RECAST</span>, jump, or dash to exit the kart early.<br><br><span class="damage-value">Initial Damage: 100</span><br><span class="damage-value">Detonation Damage: 100</span><br><span class="mana-text">Mana Cost: 25</span> • <span class="cooldown-text">Cooldown: 40s</span>', upgrades: [{ tier: 2, description: '-10s Cooldown' }, { tier: 3, description: 'Allies gain shield when getting in Kart' }] }
+                        }
+                    },
+                    {
+                        name: 'Bishop',
+                        role: 'initiator',
+                        description: 'Strategic commander with battlefield control and team coordination abilities.',
+                        portrait: 'assets/images/hunters/Bishop.png',
+                        abilities: {
+                            passive: { icon: 'bishop_P.png', name: 'Kinetic Actuators', type: 'Passive', description: 'Scoring a direct hit with your <span class="effect-text">Rocket Launcher (LMB)</span> Rockets grants you a <span class="status-effect">Big Rocket</span> that has a larger explosion radius and deals <span class="damage-value">200 + 0 (55%)</span> damage. Direct hits also reduce <span class="effect-text">Rocket Jump (L SHIFT)</span> charge time by 2s.' },
+                            primary: { icon: 'bishop_lmb_1.png', name: 'Rocket Launcher', type: 'Primary', description: 'Fire a <span class="status-effect">Rocket</span> that deals <span class="damage-value">110 + 0 (30%)</span> damage in a moderate radius. Their explosions have fall-off damage. When <span class="status-effect">Kinetic Actuators (Passive)</span> activates, your next shot fires a <span class="status-effect">Big Rocket</span> that has a larger explosion radius and deals <span class="damage-value">200 + 0 (55%)</span> damage.' },
+                            secondary: { icon: 'bishop_rmb.png', name: 'Displacement Charge', type: 'Secondary', description: 'Place an explosive satchel that explodes after a 6s delay for <span class="damage-value">120 + 0 (60%)</span> damage, and knocks back you and nearby enemies. Re-activate to detonate early. <br><span class="mana-text">Mana Cost: 25</span> • <span class="cooldown-text">Cooldown: 15s</span>', upgrades: [{ tier: 1, description: '+40% Damage' }, { tier: 2, description: '-2.5s Cooldown' }, { tier: 3, description: '-15 Mana Cost, Reduce cooldown by 50% when you impulse yourself' }] },
+                            dash: { icon: 'bishop_dash.png', name: 'Rocket Jump', type: 'Dash', description: 'Blast yourself into the air and deal <span class="damage-value">100 + 0 (30%)</span> damage in a small radius around your feet, knocking back enemies. Hitting enemies from above <span class="status-effect">Slams</span> them downwards. Has <span class="effect-text">2 charge(s)</span>. <br><span class="mana-text">Mana Cost: 12.5</span> • <span class="cooldown-text">Cooldown: 14s</span>', upgrades: [{ tier: 1, description: '-3s Cooldown' }, { tier: 2, description: '+1 Charge' }, { tier: 3, description: 'Get a Big Rocket on activation' }] },
+                            ability: { icon: 'bishop_q.png', name: 'Haymaker', type: 'Ability', description: 'Charge up for 0.5s, then punch all enemies in front of you for <span class="damage-value">115 + 0 (34%)</span> damage, knocking them back. Enemies knocked into a wall are <span class="status-effect">Stunned</span>, damaged again, and dealt 20% of their max health as damage in a small radius that also knocks up enemies. If a Wisp is knocked into a wall, they die. If you hit nothing, you are heavily <span class="status-effect">Slowed</span> for 0.5s. <span class="effect-text">Iron Fist: this ability can punch trees.</span> <br><span class="mana-text">Mana Cost: 25</span> • <span class="cooldown-text">Cooldown: 12s</span>', upgrades: [{ tier: 1, description: '+30% Damage' }, { tier: 2, description: '-5s Cooldown' }, { tier: 3, description: 'Grants Max HP Shield on hit that can stack twice. Cooldown is reduced by 1s if any valid target is hit.' }] },
+                            ultimate: { icon: 'bishop_R.png', name: 'Blast-off!', type: 'Ultimate', description: 'Blast off toward your target location. If you hit an enemy, jump in your current movement input direction, deal <span class="damage-value">160 + 0 (50%)</span> damage, and <span class="status-effect">Stun</span> them for 0.5s-1.2s based on how long you traveled. Other enemies in a moderate radius are damaged and knocked away. <br><span class="mana-text">Mana Cost: 40</span> • <span class="cooldown-text">Cooldown: 60s</span>', upgrades: [{ tier: 1, description: '-10s Cooldown' }, { tier: 2, description: '+50% Damage' }] }
+                        }
+                    },
+                    {
+                        name: 'Brall',
+                        role: 'fighter',
+                        description: 'Berserker warrior with rage mechanics and devastating melee combat abilities.',
+                        portrait: 'assets/images/hunters/Brall.png',
+                        abilities: {
+                            passive: { icon: 'brall_P.png', name: 'Blazing Spirit', type: 'Passive', description: 'Grants 15% bonus damage, 12% dash haste, 20% ability haste when Empowered. Heals 20% of enemy max health when knocking an enemy hunter. Can climb double highground walls.' },
+                            primary: { icon: 'brall_lmb_1.png', name: 'Caldera, Molten Greatsword', type: 'Primary', description: '<span class="effect-text">Quick Melee (PRESS)</span><br>Slash in a cone in front of you dealing <span class="damage-value">20</span> damage.<br><br>Landing hits in the center edge of your strike deals <span class="damage-value">20</span> bonus damage.<br><br>Hits generate <span class="mana-text">5 Mana</span>.<br><br><span class="effect-text">Charge Fireblast (HOLD)</span><br>Release to fire a ranged fireblast that deals damage. Restores Mana and quickly builds <span class="effect-text">Blazing Spirit (Passive)</span>.' },
+                            secondary: { icon: 'brall_rmb.png', name: 'Adaptive Strike', type: 'Secondary', description: 'Mana: 20, Cooldown: 2.5s. Multiple modes: Execution Slam: 70 + (40.8%) damage, 1.5x damage to targets below 35% health. Fiery Lunge, Obsidian Slam, Scorching Spin variations.' },
+                            dash: { icon: 'brall_dash.png', name: 'Flame Step', type: 'Dash', description: 'Mana: 15, Cooldown: 13s. Deals 18 + (20.3%) damage. Tip hits deal 36 + (40.5%) damage. 2 charges, refunds mana on hit.' },
+                            ability: { icon: 'brall_Q.png', name: 'Feysteel Chain', type: 'Ability', description: 'Mana: 15, Cooldown: 16s. Throws chain dealing 12 + (12%) damage. Applies Anti-Heal. Can pull to target. Tether lasts 5 seconds.' },
+                            ultimate: { icon: 'brall_R.png', name: 'Volcanic Rebuke', type: 'Ultimate', description: 'Ultimate ability that delivers devastating volcanic attacks with significant area of effect damage.' }
+                        }
+                    },
+                    {
+                        name: 'Carbine',
+                        role: 'fighter',
+                        description: 'High-tech weapons specialist with precision combat and advanced gadgets.',
+                        portrait: 'assets/images/hunters/Carbine.png',
+                        abilities: {
+                            passive: { icon: 'Carbine_P.png', name: 'Enmity Core', type: 'Passive', description: 'Hits on enemy Hunters with <span class="effect-text">XT3 Heavy Blaster (LMB)</span> shots partially refund the cooldown of <span class="effect-text">Thrusters (L SHIFT)</span>. Knocks and kills refund one charge of <span class="effect-text">Overkill Rounds (R)</span> while the ability is active.' },
+                            primary: { icon: 'carbine_lmb_1.png', name: 'XT3 Heavy Blaster', type: 'Primary', description: 'Fire a blaster projectile, dealing <span class="damage-value">71.2 + 0 (45%)</span> damage. Can be quickly fired up to 3 times before reloading. The first shot from a full cartridge deals <span class="damage-value">23.8 + 0 (15%)</span> bonus damage at long range.'},
+                            secondary: { icon: 'Carbine_RMB.png', name: 'Percussive Burst', type: 'Secondary', description: 'After a 0.5s warmup, knock back enemies in a cone, dealing <span class="damage-value">52 + 0 (25.6%)</span> damage and <span class="status-effect">Stunning</span> enemies that are hit into terrain. <br><span class="mana-text">Mana Cost: 25</span> • <span class="cooldown-text">Cooldown: 16s</span>', upgrades: [{ tier: 2, description: '+25% Damage, -2s Cooldown' }, { tier: 3, description: '+50% Damage, -2s Cooldown' }, { tier: 4, description: '+65% Damage, -1s Cooldown. Refunds 4.0s of cooldown on successful wallstun (min. 1.0s CD).' }] },
+                            dash: { icon: 'Carbine_LSHIFT.png', name: 'Thrusters', type: 'Dash', description: 'Move with a burst of speed in your facing direction. After dashing, Gain 1 bonus empowered shot of <span class="effect-text">XT3 Heavy Blaster (LMB)</span> that <span class="status-effect">Slows</span> enemies. <br><span class="mana-text">Mana Cost: 25</span> • <span class="cooldown-text">Cooldown: 12s</span>', upgrades: [{ tier: 2, description: '-1.0s Cooldown' }, { tier: 3, description: '-0.5s Cooldown' }, { tier: 4, description: 'Enhanced upward velocity on obstacle impact for Air Dash.' }] },
+                            ability: { icon: 'Carbine_Q.png', name: 'Shocktrap Drone', type: 'Ability', description: 'Launch a scanning drone that gives vision of enemies. Re-trigger to explode the drone, <span class="status-effect">Slowing</span> enemies and creating a trap. The explosion grants lingering vision of the area for a short duration. Trap walls <span class="status-effect">Stun</span> enemies on impact and self-destruct. <br><span class="mana-text">Mana Cost: 25</span> • <span class="cooldown-text">Cooldown: 30s</span>', upgrades: [{ tier: 2, description: '-3s Cooldown' }, { tier: 3, description: '-3s Cooldown' }, { tier: 4, description: 'Trap duration increased by 10s · 6s Cooldown less' }] },
+                            ultimate: { icon: 'Carbine_R.png', name: 'Overkill Rounds', type: 'Ultimate', description: 'Overcharge your <span class="effect-text">XT3 Heavy Blaster (LMB)</span>, gaining two long-range shots that deal <span class="damage-value">136 + 0 (72%)</span> damage and pierce enemies, destructibles, and wisps. The shots create lingering vision zones on projectile death that persist for a short duration. Refund an additional shot on knocking an enemy or destroying a wisp. <br><span class="mana-text">Mana Cost: 40</span> • <span class="cooldown-text">Cooldown: 45s</span>', upgrades: [{ tier: 2, description: '+15% Damage, -5s Cooldown' }, { tier: 3, description: '+15% Damage, -5s Cooldown' }] }
+                        }
+                    },
+                    {
+                        name: 'Celeste',
+                        role: 'controller',
+                        description: 'Cosmic mage with stellar abilities and long-range magical combat specialization.',
+                        portrait: 'assets/images/hunters/Celeste.png',
+                        abilities: {
+                            passive: { icon: 'celeste_P.png', name: 'Shatter', type: 'Passive', description: 'Celeste\'s damaging abilities apply <span class="status-effect">Chill</span> for 4s. If an enemy Hunter is knocked or a minion killed while <span class="status-effect">Chilled</span>, they will shatter after a short delay, dealing <span class="damage-value">180 + 0 (100%)</span> damage to nearby enemies.' },
+                            primary: { icon: 'celeste_lmb_1.png', name: 'Ice Darts', type: 'Primary', description: '<span class="effect-text">HOLD</span> to fire a barrage of semi-homing Ice Darts that deal <span class="damage-value">18 + 0 (5%)</span> damage each. At the end of the burst, fire 3 larger darts that deal double damage, fly faster, and travel further. Hitting 8 darts on the same target triggers <span class="status-effect">Shatter (Passive)</span>, dealing <span class="damage-value">180 + 0 (100%)</span> bonus damage in an area. <span class="effect-text">Ice Darts (LMB)</span> deal bonus damage during <span class="effect-text">Skate (L SHIFT)</span>.' },
+                            secondary: { icon: 'celeste_rmb.png', name: 'Cryo Spear', type: 'Secondary', description: 'Fire an icy spear that deals <span class="damage-value">83.2 + 0 (50%)</span> Explosive Damage in a small area and <span class="status-effect">Slows</span>. Hitting an enemy closer slows for more, hitting an enemy further away deals more damage. After a short delay, the spear detonates, dealing <span class="damage-value">105.9 + 0 (58.2%)</span> additional Explosive Damage. Has <span class="effect-text">2 charges</span>. <br><span class="mana-text">Mana Cost: 12</span> • <span class="cooldown-text">Cooldown: 12s</span>', upgrades: [{ tier: 2, description: '+15% Damage, -1.75s Cooldown' }, { tier: 3, description: '+15% Damage, -1.75s Cooldown' }, { tier: 4, description: '+45% Explosion Damage' }] },
+                            dash: { icon: 'celeste_dash.png', name: 'Skate', type: 'Dash', description: '<span class="effect-text">HOLD</span> to skate in your direction, release to stop. Releasing <span class="effect-text">Skate (L SHIFT)</span> early refunds a portion of its cooldown. <span class="effect-text">Ice Darts (LMB)</span> deals <span class="damage-value">2x</span> damage while skating. <span class="effect-text">Lv.4 Skate</span> – Repeated casts of Skate over Abyss will create weaker islands. Internal cooldown: 20s. <span class="effect-text">Max CD Refund: 65%</span> <br><span class="mana-text">Mana Cost: 15</span> • <span class="cooldown-text">Cooldown: 13s</span>', upgrades: [{ tier: 2, description: '-1.5s Cooldown' }, { tier: 3, description: '-1.5s Cooldown' }, { tier: 4, description: 'Creates ice islands when dashing over Abyss' }] },
+                            ability: { icon: 'celeste_Q.png', name: 'Frozen Barricade', type: 'Ability', description: 'Summon a moving wall of ice with <span class="effect-text">2200 Health</span> that blocks projectiles and pushes targets it collides with. Recast to freeze the wall in place. <br><span class="mana-text">Mana Cost: 30</span> • <span class="cooldown-text">Cooldown: 20s</span>', upgrades: [{ tier: 2, description: '-2.5s Cooldown' }, { tier: 3, description: '-2.5s Cooldown' }, { tier: 4, description: '+1000 Wall Health' }] },
+                            ultimate: { icon: 'celeste_R.png', name: 'Chilling Finale', type: 'Ultimate', description: 'Become <span class="status-effect">Invulnerable</span> to all damage and create a <span class="status-effect">Slowing</span> zone that stacks on enemies for up to 3.5s. Fully charged, Ice Crash <span class="effect-text">Chilling Finale (R)</span> deals <span class="damage-value">120 + 0 (125%)</span> damage and <span class="status-effect">Stuns</span> all enemies in its radius. You can reactivate it early in the final 0.75s to deal 67% of the above effects. Reactivating before the final 0.75s cancels this spell. Blocked by Line of Sight. <span class="effect-text">Stun Duration: 2s</span> • <span class="effect-text">Delay Time: 2.75s</span> <br><span class="mana-text">Mana Cost: 50</span> • <span class="cooldown-text">Cooldown: 80s</span>', upgrades: [{ tier: 2, description: '+40% Damage, -10s Cooldown' }, { tier: 3, description: '-10s Cooldown' }] }
+                        }
+                    },
+                    {
+                        name: 'Crysta',
+                        role: 'controller',
+                        description: 'Crystal manipulation specialist focusing on area control and terrain modification.',
+                        portrait: 'assets/images/hunters/Crysta.png',
+                        abilities: {
+                            passive: { icon: 'Crysta_P.png', name: 'Reverberation', type: 'Passive', description: 'Your abilities mark enemies that your basic attacks and ult detonate for <span class="damage-value">48</span> damage. Gain <span class="mana-text">15 mana</span> and <span class="effect-text">2s reduced charge time</span> on <span class="effect-text">Double Dash (L SHIFT)</span> each time this happens.' },
+                            primary: { icon: 'crysta_lmb_1.png', name: 'Maybelle & Boo', type: 'Primary', description: 'Fire a shot from your drone, dealing <span class="damage-value">40</span> damage. After using <span class="effect-text">Double Dash (L SHIFT)</span>, fire a double shot. Detonates <span class="status-effect">Reverberation (Passive)</span>.' },
+                            secondary: { icon: 'Crysta_RMB.png', name: 'Flux Snare', type: 'Secondary', description: 'Fire an energy snare that does <span class="damage-value">44</span> damage on the way out, then returns to you, pulling, dealing damage, and grounding targets it hits on the way back. Passes through characters. Hold down input to steer the outgoing missile. <br><span class="mana-text">Mana Cost: 20</span> • <span class="cooldown-text">Cooldown: 9.5s</span>', upgrades: [{ tier: 2, description: '+25% Damage, -1s Cooldown' }, { tier: 3, description: '+25% Damage, -1s Cooldown' }, { tier: 4, description: '-10% CD per character hit' }] },
+                            dash: { icon: 'Crysta_Dash.png', name: 'Double Dash', type: 'Dash', description: 'Short dash with two charges. Empowers <span class="effect-text">Maybelle & Boo (LMB)</span> to fire two shots and resets its cooldown. <br><span class="mana-text">Mana Cost: 15</span> • <span class="cooldown-text">Cooldown: 15s</span>', upgrades: [{ tier: 2, description: '-4s Charge Time' }, { tier: 3, description: '-4s Charge Time' }, { tier: 4, description: 'Procing Passive Grants Half a Charge' }] },
+                            ability: { icon: 'Crysta_Q.png', name: 'Magireactive Burst', type: 'Ability', description: 'Press to fire a damage zone to target location. Press again to detonate, dealing <span class="damage-value">132</span> damage to enemies in the zone. Auto-detonates after 6s. <br><span class="mana-text">Mana Cost: 30</span> • <span class="cooldown-text">Cooldown: 11.5s</span>', upgrades: [{ tier: 2, description: '+10% Damage, -1.5s Cooldown' }, { tier: 3, description: '+10% Damage, -1.5s Cooldown' }, { tier: 4, description: 'Explodes a second time after a short delay' }] },
+                            ultimate: { icon: 'Crysta_R.png', name: 'Nuclarite Salvo', type: 'Ultimate', description: 'Unleash the magireactive power within you, sending a barrage of 5 high-energy beams toward target location, each dealing <span class="damage-value">41</span> damage. Shots alternate over each shoulder, firing two projectiles on the last shot. Shots detonate and apply <span class="status-effect">Reverberation (Passive)</span>. <br><span class="mana-text">Mana Cost: 50</span> • <span class="cooldown-text">Cooldown: 50s</span>', upgrades: [{ tier: 2, description: '+10% Damage, -5s Cooldown' }, { tier: 3, description: '+10% Damage, -5s Cooldown' }] }
+                        }
+                    },
+                    {
+                        name: 'Elluna',
+                        role: 'protector',
+                        description: 'Mobile sustain master and dedicated healer who keeps teams alive through dangerous encounters.',
+                        portrait: 'assets/images/hunters/Elluna.png',
+                        abilities: {
+                            passive: { icon: 'elluna_P.png', name: 'Soulpack', type: 'Passive', description: 'Touch a knocked ally to pick them up and carry them with you. You cannot pick up allies being stomped. Gain a <span class="effect-text">200-450 Health Shield</span> based on level, which refills each time you pick up an ally. If the shield breaks, or you are crowd-controlled, you are <span class="status-effect">Stunned</span>, drop your allies, and cannot pick them back up for 4s. You are <span class="status-effect">Slowed</span> by 20% while carrying allies.' },
+                            primary: { icon: 'elluna_lmb_1.png', name: 'Crescent Bolt', type: 'Primary', description: 'Fire a shot that deals <span class="damage-value">33</span> damage. Hits apply <span class="status-effect">Moon Burn</span> to the target. Hitting a target affected by <span class="status-effect">Moon Burn</span> deals bonus damage and returns <span class="mana-text">5 Mana</span>. Stacks up to 5 times. After not firing for a short duration, your next shot is <span class="effect-text">Empowered</span>, with increased range and returns <span class="mana-text">10 Mana</span>.', upgrades: [{ tier: 1, description: '+25% Damage' }, { tier: 2, description: '+25% Damage' }, { tier: 3, description: '+50% AP ratio on empowered shot, +1 Mana regen on Empowered' }] },
+                            secondary: { icon: 'elluna_rmb.png', name: 'Darkside Binding', type: 'Secondary', description: 'Fire a spell that deals <span class="damage-value">36</span> damage to the first enemy it hits. After a 2s delay, the target and enemies around it take <span class="damage-value">140</span> damage and are <span class="status-effect">Rooted</span> for 1.1s. Applies <span class="status-effect">Moon Burn</span> to <span class="status-effect">Rooted</span> targets. <br><span class="mana-text">Mana Cost: 40</span> • <span class="cooldown-text">Cooldown: 11.5s</span>', upgrades: [{ tier: 1, description: '+40% Damage' }, { tier: 2, description: '+0.3s Root Duration' }, { tier: 3, description: '200% Detonation radius, -3s Cooldown, +50% AP Ratio on Delayed Hit' }] },
+                            dash: { icon: 'elluna_dash.png', name: 'Lunar Dash', type: 'Dash', description: 'Dash forward, traveling further if airborne. Dashing through allies refunds half of this ability\'s cooldown and 1s of <span class="effect-text">Moonlight Blessing (Q)</span>\'s cooldown. Lunar Dash and Lunar Air Dash have separate cooldowns. Air dash costs <span class="mana-text">35 Mana</span> and has <span class="cooldown-text">14s cooldown</span>. <br><span class="mana-text">Mana Cost: 12.5</span> • <span class="cooldown-text">Cooldown: 7s</span>', upgrades: [{ tier: 1, description: '-0.75s (-1.5s Air) Cooldown' }, { tier: 2, description: '-0.75s (-1.5s Air) Cooldown' }, { tier: 3, description: '-1s Cooldown, Air Dash CD refreshed when picking up a wisp' }] },
+                            ability: { icon: 'elluna_Q.png', name: 'Moonlight Blessing', type: 'Ability', description: '<span class="effect-text">Heal</span> allies in a radius around you over 2.5s with a burst of <span class="damage-value">110 (+68%)</span> Health at the end. Reactivate to toss the zone to target location. It attaches to any ally it passes through. Heal amounts are increased for 1s after throwing. Moonlight Blessing is destroyed if it is attached to you and you are <span class="status-effect">Stunned</span>. <span class="effect-text">Heal is 33% effective on yourself. Heal is 500% as effective on Wisps.</span> <br><span class="mana-text">Mana Cost: 45</span> • <span class="cooldown-text">Cooldown: 12s</span>', upgrades: [{ tier: 1, description: '+22.5% Healing' }, { tier: 2, description: '+27.5% Healing' }, { tier: 3, description: '-3s Cooldown, 1s healing increase after throwing doubled' }] },
+                            ultimate: { icon: 'elluna_R.png', name: 'Divine Intervention', type: 'Ultimate', description: '<span class="effect-text">Heal</span> an ally or allied Wisp for <span class="damage-value">35 (+ 8%)</span> per second for 5s. Wisps will also be <span class="effect-text">Resurrected</span>, teleported to you, and <span class="effect-text">Healed</span>. You can cast other abilities while channeling. If you are knocked, <span class="status-effect">Stunned</span>, or move too far away, the effect ends. If cast completes on a Wisp, you <span class="effect-text">Heal</span> yourself. <br><span class="mana-text">Mana Cost: 50</span> • <span class="cooldown-text">Cooldown: 60s</span>', upgrades: [{ tier: 1, description: '+25% Healing, -5s Cooldown' }, { tier: 2, description: '+25% Healing, -5s Cooldown' }, { tier: 3, description: '-3s Cooldown, 1s healing increase after throwing doubled' }] }
+                        }
+                    },
+                    {
+                        name: 'Eva',
+                        role: 'protector',
+                        description: 'Defensive specialist with barrier abilities and team protection mechanics.',
+                        portrait: 'assets/images/hunters/Eva.png',
+                        abilities: {
+                            passive: { icon: 'EVA_P.png', name: 'Kiss of Death', type: 'Passive', description: 'Executing or standing on enemy Wisps <span class="effect-text">Heals</span> Eva for <span class="damage-value">47.5 Health</span> per second, and refunds <span class="effect-text">4 seconds</span> of her Ability cooldowns per second.' },
+                            primary: { icon: 'eva_lmb_1.png', name: 'Corrupted Tether', type: 'Primary', description: '<span class="effect-text">HOLD</span> to connect a beam to a target, damaging enemies or healing allies. <span class="damage-value">Enemy Tether</span>: Deals <span class="damage-value">30</span> damage to target every 0.25s. Damage increases by up to 200% over 2 seconds. While attached to an enemy or destructible, refunds <span class="mana-text">10 Mana</span> per hit. <span class="effect-text">Ally Tether</span>: Heal your ally for <span class="damage-value">20 + 0 (7.5%)</span> Health every 0.25 seconds. Heal per tick increases by up to 100% over 2 seconds. Costs <span class="mana-text">5 Mana</span> per 0.25 seconds when healing allies. Can be used to heal and move <span class="effect-text">Orbs of Argos (RMB)</span>. Orb size increases with health. While tethered to an Orb, drag your mouse to reposition it. <br><span class="cooldown-text">Cooldown: 0.5s</span>' },
+                            secondary: { icon: 'EVA_RMB.png', name: 'Orbs of Argos', type: 'Secondary', description: 'Launch an Abyssal orb that <span class="effect-text">Heals</span> allies for <span class="damage-value">140</span> per second and deals <span class="damage-value">140</span> damage per second to enemies. The orb\'s area of effect grows based on its health. Orbs lose health to heal allies, but gain health when damaging enemies. Orbs can be healed or repositioned with <span class="effect-text">Corrupted Tether (LMB)</span>. Standing in a friendly orb\'s area of effect grants Eva a <span class="effect-text">15% Movement Speed</span> boost. Enemies affected by the orb take extra damage from <span class="effect-text">Corrupted Tether (LMB)</span>. <br><span class="mana-text">Mana Cost: 40</span> • <span class="cooldown-text">Cooldown: 10s</span>', upgrades: [{ tier: 2, description: '-2s Cooldown' }, { tier: 3, description: '+1 Charge' }, { tier: 4, description: '+25% Orb Area' }] },
+                            dash: { icon: 'EVA_LSHIFT.png', name: 'Sashay', type: 'Dash', description: 'Dash, becoming <span class="status-effect">immune to projectiles</span> for 0.1 seconds and gaining <span class="effect-text">80 bonus Movement Speed</span> that decays over 2 seconds. <br><span class="mana-text">Mana Cost: 20</span> • <span class="cooldown-text">Cooldown: 8s</span>', upgrades: [{ tier: 2, description: '-1.5s Cooldown' }, { tier: 3, description: '-1.5s Cooldown' }, { tier: 4, description: 'Increased dash distance and duration' }] },
+                            ability: { icon: 'EVA_Q.png', name: 'Beckon', type: 'Ability', description: 'Summon ethereal tendrils that drag enemies toward you and apply <span class="status-effect">Anti-Heal</span> for 4 seconds. <span class="effect-text">Antiheal Duration: 4s</span> <br><span class="mana-text">Mana Cost: 30</span> • <span class="cooldown-text">Cooldown: 20s</span>', upgrades: [{ tier: 2, description: '-4s Cooldown' }, { tier: 3, description: '-4s Cooldown' }, { tier: 4, description: 'Fully heals orbs on contact' }] },
+                            ultimate: { icon: 'EVA_R.png', name: "Sinner's Embrace", type: 'Ultimate', description: 'Throw an Abyssal Pillar that binds all enemies in an area for 4.5 seconds. Enemies that leave the area before the pillar expires are <span class="status-effect">Stunned</span> for 1.8 seconds and take <span class="damage-value">100</span> damage. Enemies can destroy the pillar. The pillar has <span class="effect-text">400 Health per tethered enemy</span>. Stun duration is reduced on targets over the Abyss. <span class="effect-text">Stun Duration: 1.8s</span> <br><span class="mana-text">Mana Cost: 25</span> • <span class="cooldown-text">Cooldown: 60s</span>', upgrades: [{ tier: 2, description: '-20s Cooldown' }, { tier: 3, description: '+50% Damage' }] }
+                        }
+                    },
+                    {
+                        name: 'Felix',
+                        role: 'frontliner',
+                        description: 'Heavy assault specialist with shield capabilities and defensive stance mechanics.',
+                        portrait: 'assets/images/hunters/Felix.png',
+                        abilities: {
+                            passive: { icon: 'felix_P.png', name: 'Ignite', type: 'Passive', description: 'Deals damage over time for 3 seconds. Level 1: 1.3% + 0.6% max health per second. Level 2: 2.6% + 1.3% max health per second. Builds Light Burns stacks (31 stacks to Ignite).' },
+                            primary: { icon: 'felix_lmb_1.png', name: 'Flamethrower', type: 'Primary', description: 'Continuous damage: 150 + (60%) per second. 0.35s cooldown between uses. 0.35s self-slow after releasing ability.' },
+                            secondary: { icon: 'felix_rmb.png', name: 'Embry Bolt', type: 'Secondary', description: 'Damage: 70 + (20%), Mana: 15, Cooldown: 9s. Spreads Ignite to nearby enemies if target already Ignited. Explosive damage type.' },
+                            dash: { icon: 'felix_dash.png', name: 'Pyro Pounce', type: 'Dash', description: 'Damage: 100 + (28%), Mana: 10, Cooldown: 9s. 2 charges. Knocks back targets. Applies 50% of a full Ignite stack.' },
+                            ability: { icon: 'felix_Q.png', name: 'Heat Shield', type: 'Ability', description: 'Damage: 51.2 + (14.2%), Mana: 15, Cooldown: 13s. Pulls nearby enemies. Applies Anti-Heal for 3s. Generates shield based on max health and enemies hit.' },
+                            ultimate: { icon: 'felix_R.png', name: 'Flight of the Firefox', type: 'Ultimate', description: 'Damage: 160 + (44%) per second, Mana: 25, Cooldown: 45s. Creates fire trail for 4 seconds. Slows enemies. Can be reactivated to end early.' }
+                        }
+                    },
+                    {
+                        name: 'Ghost',
+                        role: 'fighter',
+                        description: 'Stealth assassin with invisibility abilities and high burst damage potential.',
+                        portrait: 'assets/images/hunters/Ghost.png',
+                        abilities: {
+                            passive: { icon: 'Ghost_Icon_Passive.png', name: 'Combat Rush', type: 'Passive', description: 'Gain 6% Omnivamp for 3.5s after landing a non-LMB ability. Restores 500 Health on knocking an enemy.' },
+                            primary: { icon: 'ghost_lmb_1.png', name: 'MK7 Glyph Rifle', type: 'Primary', description: '30-round magazine. Base damage: 37 + (11%). Damage decays to 50% for last 20 rounds. Bonus damage to Dazed targets: 11.9 + (11.9%).' },
+                            secondary: { icon: 'Ghost_icon_laser.png', name: 'Spike Grenade', type: 'Secondary', description: 'Mana: 15, Cooldown: 9s. Damage: 86 + (54%). Daze duration: 1.2s when stuck to enemy, 2s when stuck to terrain.' },
+                            dash: { icon: 'Ghost_icon_combatslide.png', name: 'Combat Slide', type: 'Dash', description: 'Mana: 18, Cooldown: 11.5s (min 3.5s). Can press or hold to slide. Cooldown resets on knocks.' },
+                            ability: { icon: 'Ghost_icon_spikegrenade.png', name: 'Arcane Railgun', type: 'Ability', description: 'Mana: 40, Cooldown: 12s. Charge time: 0.8s. Damage: 115 + (61%). Reduces cooldown by 30% when hitting an enemy.' },
+                            ultimate: { icon: 'Ghost_icon_ult.png', name: 'Summon Napalm', type: 'Ultimate', description: 'Mana: 40, Cooldown: 55s. Initial Damage: 83 + (104%), 50% more in center. Fire zone deals 42 + (23%) damage per second for 3s.' }
+                        }
+                    },
+                    {
+                        name: 'Hudson',
+                        role: 'controller',
+                        description: 'Territory control specialist with area denial and environmental manipulation.',
+                        portrait: 'assets/images/hunters/Hudson.png',
+                        abilities: {
+                            passive: { icon: 'hudson_P.png', name: 'Salvager', type: 'Passive', description: 'Scrap Engine: Restore 25% max Armor after knocking/killing enemy Hunter. Repair Routines: Regenerate 1% armor per second after not taking damage for 4s.' },
+                            primary: { icon: 'hudson_lmb_1.png', name: 'Minigun', type: 'Primary', description: 'Damage: 40 + (6%) per bullet. Slows movement while firing. Becomes more accurate when held and while stationary. Base range: 1150.' },
+                            secondary: { icon: 'hudson_rmb.png', name: 'Spin Barrels', type: 'Secondary', description: 'Increases damage, range, and rate of fire of Minigun. Pierces targets when fully spun up. Takes 25% more damage from behind when spun up.' },
+                            dash: { icon: 'hudson_dash.png', name: 'Hover Jets', type: 'Dash', description: 'Cooldown: 12.5s, Mana: 25. Provides burst of speed. Can hover for up to 1.4s. Impacts deal 100 damage (300 when spun up). Refunds 25% cooldown per enemy hit.' },
+                            ability: { icon: 'hudson_Q.png', name: 'Barbed Wire', type: 'Ability', description: 'Cooldown: 16s, Mana: 25. Lobs device creating slow/ground field. Deals 350 + (20%) damage to enemies dashing through. Field decays, taking 125 damage per second.' },
+                            ultimate: { icon: 'hudson_R.png', name: 'Salvage Hook', type: 'Ultimate', description: 'Cooldown: 50s, Mana: 30. Grips enemy for up to 6s. Slows target by 65%. Anti-heals target. Reels in enemies below 15% health.' }
+                        }
+                    },
+                    {
+                        name: 'Jin',
+                        role: 'controller',
+                        description: 'Lightning-powered mage with area-of-effect abilities and energy manipulation.',
+                        portrait: 'assets/images/hunters/Jin.png',
+                        abilities: {
+                            passive: { icon: 'jin_P.png', name: 'Shadowgrace', type: 'Passive', description: 'Warns when watched by enemy. Gains 100 Movement Speed when out of enemy sight. Movement Speed in combat increases with hits: 1st hit: +10, 2nd hit: +30, 3rd hit: +60.' },
+                            primary: { icon: 'jin_lmb_1.png', name: "Ash'gara Warblade", type: 'Primary', description: 'Charged Stab: 68 + (45%) damage. Follow Up Slash: 26 + (51%) damage. Spin Slash: 52 + (35%) damage. Hitting an enemy refunds 5 Mana.' },
+                            secondary: { icon: 'jin_rmb.png', name: 'Flash Dagger', type: 'Secondary', description: 'Mana: 25, Cooldown: 14s. Throws knife that teleports you to opposite side of impacted enemies. Damage: Up to 29.6 + (51.2%) based on distance.' },
+                            dash: { icon: 'jin_dash.png', name: 'Dodge Roll', type: 'Dash', description: 'Mana: 15, Cooldown: 7/12.5s. Dashes to target location. Ex-Dash: Aerial Dodge Roll with further distance.' },
+                            ability: { icon: 'jin_Q.png', name: 'Flip Slash/Death Blow', type: 'Ability', description: 'Mana: 10, Cooldown: 8s. Flip Slash: 25 + (51%) damage. Death Blow: 81 + (28.8%) damage, slams and grounds enemies.' },
+                            ultimate: { icon: 'jin_R.png', name: 'Feylight Clone', type: 'Ultimate', description: 'Mana: 25, Cooldown: 45s. Creates a clone that runs to target location. Clone can cast spells Jin casts. Can swap locations with clone.' }
+                        }
+                    },
+                    {
+                        name: 'Joule',
+                        role: 'protector',
+                        description: 'Electric-powered support specialist with team utility and protection abilities.',
+                        portrait: 'assets/images/hunters/joule.png',
+                        abilities: {
+                            passive: { icon: 'joule_P.png', name: 'Static Charge', type: 'Passive', description: 'Applies stacks of Static to enemies. At 4 stacks, enemy is fully Static Charged. Dashing through charged enemy resets Surge cooldown and deals 20% max health + 40 + (23%) damage.' },
+                            primary: { icon: 'joule_lmb_1.png', name: 'Jolt', type: 'Primary', description: 'Damage: 50 + (28%). Fires lightning bolt that passes through targets. Applies 1 stack of Static.' },
+                            secondary: { icon: 'joule_rmb.png', name: 'Voltaic Spear', type: 'Secondary', description: 'Mana: 20, Cooldown: 10s. Damage: 74.3 + (41%), scales with charge time. Knockback effect, stuns targets when they collide with terrain.' },
+                            dash: { icon: 'joule_dash.png', name: 'Surge', type: 'Dash', description: 'Mana: 20, Cooldown: 9s. Damage: 50 + (28%). Dash makes Joule incorporeal to projectiles. Hitting max Static stacks fully resets cooldown.' },
+                            ability: { icon: 'joule_Q.png', name: 'Lightning Strike', type: 'Ability', description: 'Mana: 25, Cooldown: 12s. Damage: 71.7 + (40%). Launches targets in aimed direction, grounds target for 1.2s.' },
+                            ultimate: { icon: 'joule_R.png', name: 'Thunderstorm', type: 'Ultimate', description: 'Mana: 35, Cooldown: 60s. Damage: 40 + (22%). Launches Joule into air, becoming incorporeal, then crashes down at target location.' }
+                        }
+                    },
+                    {
+                        name: 'Kingpin',
+                        role: 'initiator',
+                        description: 'Aggressive initiator with crowd control and team fight engagement abilities.',
+                        portrait: 'assets/images/hunters/Kingpin.png',
+                        abilities: {
+                            passive: { icon: 'kingpin_P.png', name: 'Feed the Beast', type: 'Passive', description: 'Grants 2.5% Max Health per knock/assist (max 10 stacks). Deals 50% bonus backstab damage. Restores 250 Health on knocking an enemy.' },
+                            primary: { icon: 'kingpin_lmb_1.png', name: 'Scattergun', type: 'Primary', description: 'Fires 7 slugs per shot. Damage: 15 + (4%) per slug. Dramatically decreases accuracy with each attack. 66% increased damage to Armor when fired without spread.' },
+                            secondary: { icon: 'kingpin_rmb.png', name: 'Abyssal Grasp', type: 'Secondary', description: 'Cooldown: 18s, Mana: 30. Pierces terrain. Pulls first target hit (enemy or ally). Grounds enemies when reaching Kingpin.' },
+                            dash: { icon: 'kingpin_dash.png', name: 'Dash', type: 'Dash', description: 'Cooldown: 7/14s, Mana: 10/15. Goes further while airborne. Separate ground and air dash cooldowns.' },
+                            ability: { icon: 'kingpin_Q.png', name: 'Primal Slam', type: 'Ability', description: 'Cooldown: 12s, Mana: 30. Damage: 196 + (38%). Stuns and slams enemies. Sends Kingpin downward after casting.' },
+                            ultimate: { icon: 'kingpin_R.png', name: 'Slugwave', type: 'Ultimate', description: 'Cooldown: 35s, Mana: 25. Fires 6 Eldritch slugs. Damage: 34.7 + (17%) per slug. Applies Anti-Heal. Fires second wave after 0.6s delay.' }
+                        }
+                    },
+                    {
+                        name: 'Myth',
+                        role: 'controller',
+                        description: 'Mystical abilities and illusions specialist focusing on deception and area control.',
+                        portrait: 'assets/images/hunters/myth.png',
+                        abilities: {
+                            passive: { icon: 'myth_P.png', name: 'Spectral Hunter', type: 'Passive', description: 'Vision of injured hunters through fog of war. Can climb double highground walls when facing them. Restores 500 Health on knocking an enemy.' },
+                            primary: { icon: 'myth_lmb_1.png', name: 'Greenwood Bow', type: 'Primary', description: 'Charge time: 1.1s. Green Stage (0.5s): 40-108 damage. Blue Stage (0.6s): Up to 198 damage. Perfect moment shots deal bonus damage.' },
+                            secondary: { icon: 'myth_rmb.png', name: 'Heartpiercer', type: 'Secondary', description: 'Cooldown: 16s, Mana: 30. Charge and release arrow that impales and knocks back enemies. Knocking enemies into terrain stuns for 1.2s.' },
+                            dash: { icon: 'myth_dash.png', name: 'Phase Walk', type: 'Dash', description: 'Cooldown: 11s, Mana: 10. Dodge roll into phase state for 2.8s. Can walk through walls/objects. Taking damage ends Phase Walk.' },
+                            ability: { icon: 'myth_Q.png', name: 'Rain of Arrows', type: 'Ability', description: 'Cooldown: 15s, Mana: 25. Creates arrow wall for 4.5s dealing 32 damage per second. Slows and applies Anti-Heal.' },
+                            ultimate: { icon: 'myth_R.png', name: "Virideth's Fury", type: 'Ultimate', description: 'Cooldown: 50s, Mana: 40. Empowers next 3 Greenwood Bow shots. Arrows pierce objects/enemies. Final shot deals 280 damage.' }
+                        }
+                    },
+                    {
+                        name: 'Oath',
+                        role: 'frontliner',
+                        description: 'Holy warrior with divine abilities and protective aura mechanics.',
+                        portrait: 'assets/images/hunters/Oath.png',
+                        abilities: {
+                            passive: { icon: 'oath_P.png', name: 'Valiant Strength', type: 'Passive', description: 'Knocks enemies into walls stun them for 0.5 seconds. Restores 250 Health when knocking an enemy.' },
+                            primary: { icon: 'oath_lmb_1.png', name: 'Magnetic Hammer', type: 'Primary', description: 'Hammer Throw: 73 + (35%) damage. Hammer Recall: Same damage as throw. Hammer Smash (Charged): Up to 260 + (80%) damage after 1.25s.' },
+                            secondary: { icon: 'oath_RMB.png', name: 'Brightshield', type: 'Secondary', description: 'Mana: 10, Cooldown: 0.1s. Creates a shield blocking front damage. Shield scales with max HP at levels 2 and 4 (+25% each time).' },
+                            dash: { icon: 'oath_Dash.png', name: 'Spin Dash/Shield Bash', type: 'Dash', description: 'Deals 180 + (56%) damage. Knocks back enemies. Cooldown: 11/7s, Mana: 20/30. Can be used during Hammer Smash for short dash.' },
+                            ability: { icon: 'oath_Q.png', name: 'Regen Field', type: 'Ability', description: 'Mana: 60, Cooldown: 12s. Creates healing zone. Heals allies and resurrects Wisps. Healing reduced by 20%.' },
+                            ultimate: { icon: 'oath_R.png', name: 'Abyssalbreaker', type: 'Ultimate', description: 'Mana: 30, Cooldown: 50s. Creates a fissure that stuns targets briefly. Initial damage: 35 + (0%), Cascading eruptions: 208.3 + (58%) damage.' }
+                        }
+                    },
+                    {
+                        name: 'Saros',
+                        role: 'controller',
+                        description: 'Time manipulation specialist with Eclipse Portal abilities for strategic map control.',
+                        portrait: 'assets/images/hunters/Saros.png',
+                        abilities: {
+                            passive: { icon: 'saros_P.png', name: 'Ionized', type: 'Passive', description: 'Activated by detonating Nova Orb or entering Eclipse Portal. Grants increased Fire Rate, +60 Movement Speed, +5 Mana Regeneration.' },
+                            primary: { icon: 'saros_lmb.png', name: "Sunspear's Rifle", type: 'Primary', description: 'Damage: 70 + (45%). Restores 30 Mana on hit, 100 Mana on kill. Can hold to charge Sunfire.' },
+                            secondary: { icon: 'saros_rmb.png', name: 'Charge Sunfire', type: 'Secondary', description: 'Mana: 100. Damage: 74 + (68%). Applies Anti-Heal for 1s. 33% bonus damage on targets below 33% health.' },
+                            dash: { icon: 'saros_lshift.png', name: 'Dive Slash', type: 'Dash', description: 'Cooldown: 10s. Dive Damage: 12.5 + (12.5%), Slash Damage: 60 + (30%). Wall collision deals double damage and stuns.' },
+                            ability: { icon: 'saros_Q.png', name: 'Nova Orb', type: 'Ability', description: 'Cooldown: 15s. Travel Damage: 7.7 + (5.8%), Detonation Damage: 76.8 + (58%). Slows enemies and shreds armor in AoE.' },
+                            ultimate: { icon: 'saros_R.png', name: 'Eclipse Portal', type: 'Ultimate', description: 'Cooldown: 50s. Creates portal through walls. All units can use portal. Entering portal activates Ionized state.' }
+                        }
+                    },
+                    {
+                        name: 'Shiv',
+                        role: 'fighter',
+                        description: 'Agile blade dancer with combo system and high mobility assassination tactics.',
+                        portrait: 'assets/images/hunters/Shiv.png',
+                        abilities: {
+                            passive: { icon: 'shiv_P.png', name: 'Malice & Resolve', type: 'Passive', description: 'Malice: Deal 9 + (5%) more damage each consecutive Arcslinger Pistols hit on same target. Resolve: Heal 25% of Max Health whenever you knock or assist in knocking an enemy.' },
+                            primary: { icon: 'shiv_lmb_1.png', name: 'Arcslinger', type: 'Primary', description: 'Damage: 58 + (30%). Range: 850 (base), 950 (empowered). Applies 1 stack of Malice & Resolve.' },
+                            secondary: { icon: 'shiv_rmb.png', name: 'Chain Bolas', type: 'Secondary', description: 'Cooldown: 13s, Mana: 30. Initial Damage: 23 + (7%). Grounds target. If second target hit: Stuns both targets, deals 53 + (13%) bonus damage.' },
+                            dash: { icon: 'shiv_dash.png', name: 'Quickflip', type: 'Dash', description: 'Cooldown: 6.5s, Mana: 6. Grants movement speed boost. Empowered shot deals 50 + (29%) damage. Resets cooldown if empowered shot hits.' },
+                            ability: { icon: 'shiv_Q.png', name: 'Farstep Dagger', type: 'Ability', description: 'Cooldown: 28s, Mana: 30. Throws dagger 1450 units. Slows hit enemies by 50% for 4s. Mandatory teleport back to dagger.' },
+                            ultimate: { icon: 'shiv_R.png', name: 'Fusillade', type: 'Ultimate', description: 'Cooldown: 50s, Mana: 20. Fires up to 5 shots per nearby enemy over 2s. Each shot deals 25 + (13%) damage. Anti-Heals outer ring targets for 6s.' }
+                        }
+                    },
+                    {
+                        name: 'Shrike',
+                        role: 'fighter',
+                        description: 'Aerial combat specialist with flight abilities and dive attack mechanics.',
+                        portrait: 'assets/images/hunters/Shrike.png',
+                        abilities: {
+                            passive: { icon: 'shrike_P.png', name: "Raptor's Mark", type: 'Passive', description: 'Marks enemies for 6 seconds when hit by LMB or RMB. Detonating a Mark deals 175 + (145%) damage. Restores 500 Health on knocking an enemy.' },
+                            primary: { icon: 'shrike_lmb_1.png', name: 'Truetalon Rifle', type: 'Primary', description: 'Damage: 260 + (130%), Cooldown: 1.5s. Deals 50% damage point-blank, full damage at half range. Knocking an enemy empowers next shot with 150% Armor Shred.' },
+                            secondary: { icon: 'shrike_rmb.png', name: 'Dive-Bomb', type: 'Secondary', description: 'Damage: 121.5 + (63%) Explosive damage, Cooldown: 8s, Mana: 25. Detonates after 0.65s. Knocks back targets and applies Stun. Cremates Wisps struck.' },
+                            dash: { icon: 'shrike_dash.png', name: 'Disengage', type: 'Dash', description: 'Cooldown: 11s, Mana: 30. Propels Shrike backwards. Deals 45 + (25%) damage. Slows and Grounds enemy hit. Cooldown resets on Knock.' },
+                            ability: { icon: 'shrike_Q.png', name: 'Scout Hawk', type: 'Ability', description: 'Cooldown: 30s, Mana: 25. Launches a hawk to scout area. Reveals enemies and applies Anti-Heal. Can be reactivated to circle an area.' },
+                            ultimate: { icon: 'shrike_R.png', name: 'Full Bore', type: 'Ultimate', description: 'Damage: 136 + (72%), Cooldown: 55s, Mana: 30. Long-range, armor-piercing bullet. Pierces terrain.' }
+                        }
+                    },
+                    {
+                        name: 'Void',
+                        role: 'controller',
+                        description: 'Dark energy manipulator with void abilities and reality warping powers.',
+                        portrait: 'assets/images/hunters/Void.png',
+                        abilities: {
+                            passive: { icon: 'void_P.png', name: 'Hands of Fate', type: 'Passive', description: 'Deal damage to become Empowered. Build Empowered 10x faster when damaging Hunters. Float above ground (no footstep noise). Restore 500 Health on knocking an enemy.' },
+                            primary: { icon: 'void_lmb_1.png', name: 'Gravity Orb', type: 'Primary', description: 'Uncharged: 212 + (20%) damage. Charged: 280 + (28%) damage. Charged shots travel faster, pierce terrain, and slow enemies 10% for 1.5s.' },
+                            secondary: { icon: 'void_rmb.png', name: 'Void Snap', type: 'Secondary', description: 'Mana: 30, Cooldown: 10s. Base: 99 + (52%) damage. Empowered: 99 + (86%) damage. Stuns first target hit (duration increases with projectile travel distance).' },
+                            dash: { icon: 'void_dash.png', name: 'Swap', type: 'Dash', description: 'Mana: 30, Cooldown: 9.5s. Teleport ability that swaps places with units. Disorients and slows swapped enemies by 40% for 3s.' },
+                            ability: { icon: 'void_Q.png', name: 'Unstable Anomaly', type: 'Ability', description: 'Mana: 15, Cooldown: 10s. Damage: 79 + (63.8%), can increase up to 3.5x based on hold time. Creates a growing bomb that can be detonated.' },
+                            ultimate: { icon: 'void_R.png', name: 'Singularity', type: 'Ultimate', description: 'Mana: 30, Cooldown: 70s. Creates a vortex that Stuns and Pulls enemies toward center. Deals explosive damage, especially effective against destructibles. Lasts 3.5s.' }
+                        }
+                    },
+                    {
+                        name: 'Wukong',
+                        role: 'fighter',
+                        description: 'Acrobatic fighter specializing in tree perching and staff-based combat with crowd control abilities.',
+                        portrait: 'assets/images/hunters/Wukong.png',
+                        abilities: {
+                            passive: { icon: 'Wukong_P.png', name: 'Treetop Acrobat', type: 'Passive', description: 'Jump against trees to perch, reset Cloud Somersault, reduce Glider Heat, and gain invisibility while perched.' },
+                            primary: { icon: 'wukong_lmb_1.png', name: 'Black-Iron Rod', type: 'Primary', description: '3-hit combo with movement. Hold for flurry ending in heavy strike.' },
+                            secondary: { icon: 'Wukong_RMB_1.png', name: 'Perch/Dragon Slam', type: 'Secondary', description: 'First cast: Flip onto staff and gain shield. Second cast: Slam staff dealing damage, stunning center enemies and slowing edge enemies.' },
+                            dash: { icon: 'Wukong_LSHIFT.png', name: 'Cloud Somersault', type: 'Dash', description: 'Tap for quick dash, hold to somersault into air. Briefly increases Primary Attack Speed. Cooldown resets when perching.' },
+                            ability: { icon: 'Wukong_Q_1.png', name: 'Ambush/Spin Attack', type: 'Ability', description: 'Press to shapeshift into tree. Recast to exit and launch Spin Attack dealing heavy circular damage.' },
+                            ultimate: { icon: 'Wukong_R.png', name: 'Six-Monkey Strike', type: 'Ultimate', description: 'Become untargetable and split into 5 clones that dash and attack in all directions.' }
+                        }
+                    },
+                    {
+                        name: 'Zeph',
+                        role: 'protector',
+                        description: 'Wind-based support with mobility enhancement and atmospheric control abilities.',
+                        portrait: 'assets/images/hunters/Zeph.png',
+                        abilities: {
+                            passive: { icon: 'zeph_P.png', name: 'Gale Force', type: 'Passive', description: 'Applies/refreshes mark on enemies. Restores 500 Health on knocking an enemy. Reduces Mending Breeze charge duration by 1s when Windslinger hits marked target.' },
+                            primary: { icon: 'zeph_lmb_1.png', name: 'Windslinger', type: 'Primary', description: 'Cooldown: 0.6s. Quick press: 72 + (36%) damage. Held press: 84 + (60.5%) damage. Grants 5 Mana on hit. Launches Zeph backwards when used in air.' },
+                            secondary: { icon: 'zeph_rmb.png', name: 'Mending Breeze', type: 'Secondary', description: 'Mana: 25, Cooldown: 1.5s. Healing: 96 + (48%) health. Self-heal at 75% potency. Multiple charges that increase with ability level.' },
+                            dash: { icon: 'zeph_dash.png', name: 'Cyclone Dash', type: 'Dash', description: 'Mana: 20, Cooldown: 11s. Short or long dash options. Can bring allies with you and provide glider fuel. Level 3 upgrade: Creates Windrings when cast over abyss.' },
+                            ability: { icon: 'zeph_Q.png', name: 'Vortex Charm', type: 'Ability', description: 'Mana: 30, Cooldown: 12s. Damage: 96 + (38%). Pulls enemies, grounds and slows them. Stuns enemies if they collide.' },
+                            ultimate: { icon: 'zeph_R.png', name: 'Second Wind', type: 'Ultimate', description: 'Mana: 60, Cooldown: 50s. Damage: 96 + (38%). Heals allies it passes through. Knocks back enemies. Applies Restoration to allied Wisps, allowing passive resurrection.' }
+                        }
+                    }
+                ];
+
+                this.renderHunters();
+            }
+
+            filterAndRender() {
+                this.filteredHunters = this.hunters.filter(hunter => {
+                    const matchesRole = this.currentFilter === 'all' || hunter.role === this.currentFilter;
+                    const matchesSearch = this.currentSearch === '' || this.matchesSearchTerm(hunter);
+                    return matchesRole && matchesSearch;
+                });
+
+                this.renderHunters();
+            }
+
+            matchesSearchTerm(hunter) {
+                const searchableText = [
+                    hunter.name,
+                    hunter.role,
+                    hunter.description,
+                    ...Object.values(hunter.abilities).map(ability => ability.name)
+                ].join(' ').toLowerCase();
+
+                return searchableText.includes(this.currentSearch);
+            }
+
+            renderHunters() {
+                const container = document.getElementById('huntersContainer');
+                const huntersToRender = this.filteredHunters.length > 0 ? this.filteredHunters : this.hunters;
+
+                container.innerHTML = huntersToRender.map(hunter => this.createHunterCardHTML(hunter)).join('');
+
+                // Setup event listeners
+                document.querySelectorAll('.hunter-card').forEach(card => {
+                    const hunterName = card.dataset.hunter;
+                    card.addEventListener('click', () => this.showHunterDetails(hunterName));
+                });
+            }
+
+            createHunterCardHTML(hunter) {
+                const abilityIcons = Object.values(hunter.abilities).slice(0, 6);
+                
+                return `
+                    <div class="hunter-card" data-hunter="${hunter.name}">
+                        <div class="hunter-header">
+                            <img src="${hunter.portrait}" alt="${hunter.name}" class="hunter-portrait" 
+                                 onerror="SuperviveUtils.handleImageError(this, '${hunter.name}')">
+                            <div class="hunter-portrait-placeholder">${hunter.name.substring(0, 2).toUpperCase()}</div>
+                            <div class="hunter-info">
+                                <h3>${hunter.name}</h3>
+                                <div class="hunter-role role-${hunter.role}">${hunter.role}</div>
+                            </div>
+                        </div>
+                        
+                        <p class="hunter-description">${hunter.description}</p>
+                        
+                        <div class="abilities-preview">
+                            ${abilityIcons.map(ability => `
+                                <img src="assets/images/abilities/${ability.icon}" 
+                                     alt="${ability.name}" 
+                                     class="ability-icon"
+                                     title="${ability.name} (${ability.type})">
+                            `).join('')}
+                        </div>
+                        
+                        <div class="hunter-actions">
+                            <button class="btn-hunter primary">View Details</button>
+                            <button class="btn-hunter secondary" onclick="event.stopPropagation(); window.open('patches.html?hunter=${hunter.name}', '_blank')">Patch History</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            generateAbilityStats(ability) {
+                if (!ability.description) return '';
+                
+                const stats = [];
+                const desc = ability.description;
+                
+                // Extract mana cost
+                const manaMatch = desc.match(/Mana:\s*(\d+(?:\.\d+)?)/i);
+                if (manaMatch) {
+                    stats.push(`<div class="stat-badge mana"><span class="stat-icon">⚡</span>${manaMatch[1]} Mana</div>`);
+                }
+                
+                // Extract cooldown
+                const cooldownMatch = desc.match(/Cooldown:\s*([\d\.\/]+)s/i);
+                if (cooldownMatch) {
+                    stats.push(`<div class="stat-badge cooldown"><span class="stat-icon">⏱</span>${cooldownMatch[1]}s CD</div>`);
+                }
+                
+                // Extract damage
+                const damageMatch = desc.match(/Damage:\s*([\d\+\(\)%\s]+)/i);
+                if (damageMatch) {
+                    stats.push(`<div class="stat-badge damage"><span class="stat-icon">⚔</span>${damageMatch[1]}</div>`);
+                }
+                
+                return stats.length > 0 ? `<div class="ability-stats">${stats.join('')}</div>` : '';
+            }
+
+            generateUpgrades(ability) {
+                if (!ability.upgrades || ability.upgrades.length === 0) return '';
+                
+                const upgradeItems = ability.upgrades.map((upgrade, index) => {
+                    const tierClass = `tier${upgrade.tier}`;
+                    return `<div class="upgrade-item ${tierClass}">${upgrade.description}</div>`;
+                }).join('');
+                
+                return `
+                    <div class="ability-upgrades">
+                        <div class="upgrades-title">UPGRADES</div>
+                        ${upgradeItems}
+                    </div>
+                `;
+            }
+
+            showHunterDetails(hunterName) {
+                const hunter = this.hunters.find(h => h.name === hunterName);
+                if (!hunter) return;
+
+                const modal = document.getElementById('hunterModal');
+                const modalName = document.getElementById('modalHunterName');
+                const modalRole = document.getElementById('modalHunterRole');
+                const modalContent = document.getElementById('modalHunterContent');
+
+                modalName.textContent = hunter.name;
+                modalRole.textContent = hunter.role;
+                modalRole.className = `hunter-role role-${hunter.role}`;
+
+                modalContent.innerHTML = `
+                    <div class="hunter-header" style="margin-bottom: 2rem;">
+                        <img src="${hunter.portrait}" alt="${hunter.name}" style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--border-glow);">
+                        <div style="flex: 1;">
+                            <p style="color: var(--text-secondary); line-height: 1.6; font-size: 1.1rem;">${hunter.description}</p>
+                        </div>
+                    </div>
+                    
+                    <h3 style="color: var(--neon-mint); margin-bottom: 1.5rem; font-size: 1.5rem;">Abilities</h3>
+                    <div class="abilities-detailed">
+                        ${Object.entries(hunter.abilities).map(([key, ability]) => `
+                            <div class="ability-card">
+                                <img src="assets/images/abilities/${ability.icon}" alt="${ability.name}" class="ability-icon">
+                                <div class="ability-details">
+                                    <div class="ability-type">${ability.type}</div>
+                                    <h4>${ability.name}</h4>
+                                    ${this.generateAbilityStats(ability)}
+                                    <p>${ability.description || `Detailed description for ${ability.name} would be displayed here with damage values, cooldowns, and strategic usage tips.`}</p>
+                                    ${this.generateUpgrades(ability)}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="patch-history">
+                        <h3>Recent Patch History</h3>
+                        <div class="history-item">
+                            <div class="history-date">July 24, 2025 - Version 1.0</div>
+                            <ul class="history-changes">
+                                <li>Initial release with complete ability set</li>
+                                <li>Balanced for 3-hunter team composition</li>
+                                <li>Integrated with new Armory system</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+
+                modal.style.display = 'block';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('hunterModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('hunterModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Initialize the hunters manager
+        const huntersManager = new HuntersManager();
+    </script>
+</body>
+</html>

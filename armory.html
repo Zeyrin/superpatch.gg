@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Armory - SUPERPATCH.GG</title>
+    <meta name="description" content="Complete SUPERVIVE armory database with all equipment items, relics, grips, kicks, and perks.">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <style>
+        .equipment-icon:hover {
+            transform: scale(1.05);
+            border-color: var(--neon-mint);
+            box-shadow: 0 0 15px rgba(0, 255, 163, 0.4);
+        }
+
+        .equipment-stats {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stats-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .stats-list li {
+            padding: 0.25rem 0;
+            color: var(--text-secondary);
+            position: relative;
+            padding-left: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .stats-list li::before {
+            content: '+';
+            position: absolute;
+            left: 0;
+            color: var(--neon-mint);
+            font-weight: bold;
+        }
+
+        .armory-stats {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stat-number {
+            color: var(--neon-mint);
+            font-size: 2rem;
+            font-weight: bold;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 90%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-glow);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--neon-pink);
+        }
+
+        .equipment-detailed {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .equipment-detailed .equipment-icon {
+            width: 100px;
+            height: 100px;
+            flex-shrink: 0;
+        }
+
+        .equipment-details h4 {
+            color: var(--neon-mint);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .rarity-indicator {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .rarity-common { background: #666; color: white; }
+        .rarity-rare { background: #3498db; color: white; }
+        .rarity-epic { background: #9b59b6; color: white; }
+        .rarity-legendary { background: #f39c12; color: white; }
+
+        .no-results {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        /* Fix search bar to full width */
+        .search-wrapper {
+            flex: 1;
+            min-width: 300px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {            
+            .equipment-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .equipment-detailed {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-grid"></div>
+    
+    <header class="header">
+        <div class="header-content">
+            <div>
+                <a href="./" class="logo">SUPERPATCH.GG</a>
+                <div class="subtitle">SUPERVIVE Patch Notes Archive</div>
+            </div>
+            <nav class="nav-menu">
+                <a href="./" class="nav-link">Home</a>
+                <a href="patches.html" class="nav-link">Patch Notes</a>
+                <a href="hunters.html" class="nav-link">Hunters</a>
+                <a href="armory.html" class="nav-link active">Armory</a>
+                <a href="https://ko-fi.com/superpatchgg" target="_blank" class="coffee-btn">
+                    <span class="coffee-icon">☕</span>
+                    Buy me a coffee
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <section class="hero">
+            <h1 class="page-title">ARMORY</h1>
+            <p class="page-subtitle">
+                Complete equipment database for SUPERVIVE<br>
+                Explore relics, grips, kicks, perks, and consumables
+            </p>
+        </section>
+
+        <!-- Ad Spot: Top Banner -->
+        <div class="ad-container ad-banner">
+            <div class="ad-label">Advertisement</div>
+            <div class="ad-content">
+                <!-- Ad content will be inserted here -->
+                Banner Ad (728x90)
+            </div>
+        </div>
+
+        <section class="armory-stats">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalItems">50+</div>
+                    <div class="stat-label">Total Items</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="relicCount">15</div>
+                    <div class="stat-label">Relics</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="gripCount">12</div>
+                    <div class="stat-label">Grips</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="kickCount">10</div>
+                    <div class="stat-label">Kicks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="perkCount">15+</div>
+                    <div class="stat-label">Perks</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="filters-section">
+            <div class="filters-container">
+                <div class="search-wrapper">
+                    <input 
+                        type="text" 
+                        id="armorySearch" 
+                        class="search-input" 
+                        placeholder="Search equipment by name, type, or effects..."
+                    >
+                    <button class="search-clear" aria-label="Clear search" title="Clear search">×</button>
+                </div>
+                <div class="type-filters">
+                    <button class="type-filter active" data-type="all">All</button>
+                    <button class="type-filter" data-type="relic">Relics</button>
+                    <button class="type-filter" data-type="grip">Grips</button>
+                    <button class="type-filter" data-type="kick">Kicks</button>
+                    <button class="type-filter" data-type="perk">Perks</button>
+                    <button class="type-filter" data-type="consumable">Consumables</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="armoryContainer" class="armory-container">
+            <!-- Equipment will be dynamically generated here -->
+        </section>
+
+        <div class="no-results" id="noResults" style="display: none;">
+            <h3>No equipment found</h3>
+            <p>Try adjusting your search terms or filters</p>
+        </div>
+    </main>
+
+    <!-- Equipment Detail Modal -->
+    <div id="equipmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 id="modalEquipmentName"></h2>
+                    <div id="modalEquipmentType" class="equipment-type"></div>
+                </div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalEquipmentContent"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 SUPERPATCH.GG - Unofficial SUPERVIVE patch notes archive</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+            Not affiliated with Theorycraft Games. All game content and images belong to their respective owners.
+        </p>
+    </footer>
+
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/ads.js"></script>
+    <script>
+        class ArmoryManager {
+            constructor() {
+                this.equipment = [];
+                this.filteredEquipment = [];
+                this.currentFilter = 'all';
+                this.currentSearch = '';
+                this.init();
+            }
+
+            init() {
+                this.loadEquipment();
+                this.setupEventListeners();
+                this.setupSearchClear();
+                SuperviveUtils.setActiveNavLink('armory.html');
+            }
+
+            setupSearchClear() {
+                SuperviveUtils.setupSearchClear('#armorySearch', () => {
+                    this.currentSearch = '';
+                    this.filterAndRender();
+                });
+            }
+
+            setupEventListeners() {
+                const searchInput = document.getElementById('armorySearch');
+                const typeFilters = document.querySelectorAll('.type-filter');
+
+                searchInput.addEventListener('input', (e) => {
+                    this.currentSearch = e.target.value.toLowerCase();
+                    this.filterAndRender();
+                });
+
+                typeFilters.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        typeFilters.forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentFilter = e.target.dataset.type;
+                        this.filterAndRender();
+                    });
+                });
+            }
+
+            loadEquipment() {
+                this.equipment = [
+                    // Relics
+                    {
+                        name: 'Alacritonium',
+                        type: 'relic',
+                        rarity: 'legendary',
+                        icon: 'SUPERVIVE_Armory Item Icon_Alacritonium.png',
+                        description: 'Powerful energy crystal that enhances movement and ability speeds.',
+                        effects: ['Movement Speed +15%', 'Ability Haste +20%', 'Dash Cooldown -25%'],
+                        category: 'Mobility Enhancement'
+                    },
+                    {
+                        name: 'BFG',
+                        type: 'relic',
+                        rarity: 'legendary',
+                        icon: 'SUPERVIVE_Armory Item Icon_BFG.png',
+                        description: 'Big Freaking Gun - Massive damage amplifier for ranged abilities.',
+                        effects: ['Ability Damage +35%', 'Range +20%', 'Critical Hit Chance +15%'],
+                        category: 'Damage Amplification'
+                    },
+                    {
+                        name: 'Time Staff',
+                        type: 'relic',
+                        rarity: 'epic',
+                        icon: 'SUPERVIVE_Armory Item Icon_TimeStaff.png',
+                        description: 'Manipulates temporal flow to provide tactical advantages.',
+                        effects: ['Cooldown Reduction +25%', 'Slow Effect +3s', 'Time Dilation on Ultimate'],
+                        category: 'Temporal Control'
+                    },
+                    {
+                        name: 'Guardian Angel',
+                        type: 'relic',
+                        rarity: 'epic',
+                        icon: 'SUPERVIVE_Armory Item Icon_GuardianAngel.png',
+                        description: 'Divine protection that saves allies from fatal damage.',
+                        effects: ['Revive Speed +50%', 'Death Protection Shield', 'Healing +25%'],
+                        category: 'Team Support'
+                    },
+                    {
+                        name: 'Soul Stealer',
+                        type: 'relic',
+                        rarity: 'rare',
+                        icon: 'SUPERVIVE_Armory Item Icon_SoulStealer.png',
+                        description: 'Drains enemy life force to empower the wielder.',
+                        effects: ['Lifesteal +20%', 'Damage vs Low Health +30%', 'Soul Collection'],
+                        category: 'Life Manipulation'
+                    },
+
+                    // Grips
+                    {
+                        name: 'Power Gauntlet',
+                        type: 'grip',
+                        rarity: 'epic',
+                        icon: 'SUPERVIVE_Armory Item Icon_PowerGauntlet.png',
+                        description: 'Enhances grip strength and melee combat effectiveness.',
+                        effects: ['Melee Damage +40%', 'Grip Strength +60%', 'Knockback +25%'],
+                        category: 'Melee Enhancement'
+                    },
+                    {
+                        name: 'Ice Scepter',
+                        type: 'grip',
+                        rarity: 'rare',
+                        icon: 'SUPERVIVE_Armory Item Icon_IceScepter.png',
+                        description: 'Freezing weapon that slows and damages enemies.',
+                        effects: ['Freeze Chance 15%', 'Slow Duration +2s', 'Ice Damage +25%'],
+                        category: 'Elemental Control'
+                    },
+                    {
+                        name: 'Harmony Cutter',
+                        type: 'grip',
+                        rarity: 'rare',
+                        icon: 'SUPERVIVE_Armory Item Icon_HarmonyCutter.png',
+                        description: 'Balanced blade that provides precise cutting power.',
+                        effects: ['Critical Strike +20%', 'Accuracy +15%', 'Bleed Effect'],
+                        category: 'Precision Weapon'
+                    },
+                    {
+                        name: 'Burning Palm',
+                        type: 'grip',
+                        rarity: 'common',
+                        icon: 'SUPERVIVE_Armory Item Icon_BurningPalm.png',
+                        description: 'Ignites enemies with fiery touch attacks.',
+                        effects: ['Burn Damage +20%', 'Fire DOT 3s', 'Heat Generation'],
+                        category: 'Fire Weapon'
+                    },
+
+                    // Kicks
+                    {
+                        name: 'Quantum Sneakers',
+                        type: 'kick',
+                        rarity: 'legendary',
+                        icon: 'SUPERVIVE_Armory Item Icon_QuantumSneakers.png',
+                        description: 'Advanced footwear that bends space-time for movement.',
+                        effects: ['Teleport Distance +50%', 'Phase Through Walls 2s', 'Quantum Dash'],
+                        category: 'Dimensional Travel'
+                    },
+                    {
+                        name: 'Hover Wings',
+                        type: 'kick',
+                        rarity: 'epic',
+                        icon: 'SUPERVIVE_Armory Item Icon_HoverWings.png',
+                        description: 'Allows sustained flight and aerial maneuverability.',
+                        effects: ['Flight Duration +5s', 'Air Speed +30%', 'Hover Stability'],
+                        category: 'Aerial Mobility'
+                    },
+                    {
+                        name: 'Bloodlust Boots',
+                        type: 'kick',
+                        rarity: 'rare',
+                        icon: 'SUPERVIVE_Armory Item Icon_BloodlustBoots.png',
+                        description: 'Increases speed and aggression after eliminations.',
+                        effects: ['Kill Speed Boost +40%', 'Rampage Duration +3s', 'Blood Trail'],
+                        category: 'Combat Enhancement'
+                    },
+                    {
+                        name: 'Lightfoot Boots',
+                        type: 'kick',
+                        rarity: 'common',
+                        icon: 'SUPERVIVE_Armory Item Icon_LightfootBoots.png',
+                        description: 'Light and silent boots for stealth movement.',
+                        effects: ['Stealth +25%', 'Sound Reduction 80%', 'Movement Speed +10%'],
+                        category: 'Stealth'
+                    },
+
+                    // Perks
+                    {
+                        name: 'Ultimate Diadem',
+                        type: 'perk',
+                        rarity: 'legendary',
+                        icon: 'SUPERVIVE_Armory Item Icon_UltimateDiadem.png',
+                        description: 'Crown that amplifies ultimate abilities to maximum potential.',
+                        effects: ['Ultimate Damage +50%', 'Ultimate Cooldown -30%', 'Enhanced Effects'],
+                        category: 'Ultimate Enhancement'
+                    },
+                    {
+                        name: 'Scholar',
+                        type: 'perk',
+                        rarity: 'epic',
+                        icon: 'SUPERVIVE_Armory Item Icon_Scholar.png',
+                        description: 'Increases learning and adaptation rates in combat.',
+                        effects: ['XP Gain +25%', 'Ability Evolution', 'Skill Adaptation'],
+                        category: 'Growth'
+                    },
+                    {
+                        name: 'Perseverance',
+                        type: 'perk',
+                        rarity: 'rare',
+                        icon: 'SUPERVIVE_Armory Item Icon_Perseverance.png',
+                        description: 'Provides resilience against damage and debuffs.',
+                        effects: ['Damage Resistance +20%', 'Debuff Duration -50%', 'Recovery +15%'],
+                        category: 'Defense'
+                    },
+                    {
+                        name: 'Rapid Fire',
+                        type: 'perk',
+                        rarity: 'common',
+                        icon: 'SUPERVIVE_Armory Item Icon_RapidFire.png',
+                        description: 'Increases attack and ability casting speed.',
+                        effects: ['Attack Speed +30%', 'Cast Time -25%', 'Rapid Succession'],
+                        category: 'Speed'
+                    },
+
+                    // Consumables
+                    {
+                        name: 'Vive Infusor',
+                        type: 'consumable',
+                        rarity: 'epic',
+                        icon: 'SUPERVIVE_Armory Item Icon_ViveInfusor.png',
+                        description: 'Powerful healing and energy restoration device.',
+                        effects: ['Instant Health +75%', 'Energy Restoration +100%', 'Temporary Boost'],
+                        category: 'Recovery'
+                    },
+                    {
+                        name: 'Stasis',
+                        type: 'consumable',
+                        rarity: 'rare',
+                        icon: 'SUPERVIVE_Armory Item Icon_Stasis.png',
+                        description: 'Freezes time around the user for strategic advantage.',
+                        effects: ['Time Freeze 3s', 'Immunity During Stasis', 'Tactical Positioning'],
+                        category: 'Tactical'
+                    }
+                ];
+
+                // Initialize filteredEquipment with all items for default display
+                this.filteredEquipment = [...this.equipment];
+                this.updateStats();
+                this.renderEquipment();
+            }
+
+            updateStats() {
+                const stats = {
+                    total: this.equipment.length,
+                    relic: this.equipment.filter(item => item.type === 'relic').length,
+                    grip: this.equipment.filter(item => item.type === 'grip').length,
+                    kick: this.equipment.filter(item => item.type === 'kick').length,
+                    perk: this.equipment.filter(item => item.type === 'perk').length
+                };
+
+                document.getElementById('totalItems').textContent = stats.total;
+                document.getElementById('relicCount').textContent = stats.relic;
+                document.getElementById('gripCount').textContent = stats.grip;
+                document.getElementById('kickCount').textContent = stats.kick;
+                document.getElementById('perkCount').textContent = stats.perk;
+            }
+
+            filterAndRender() {
+                this.filteredEquipment = this.equipment.filter(item => {
+                    const matchesType = this.currentFilter === 'all' || item.type === this.currentFilter;
+                    const matchesSearch = this.currentSearch === '' || this.matchesSearchTerm(item);
+                    return matchesType && matchesSearch;
+                });
+
+                this.renderEquipment();
+            }
+
+            matchesSearchTerm(item) {
+                const searchableText = [
+                    item.name,
+                    item.type,
+                    item.description,
+                    item.category,
+                    ...item.effects
+                ].join(' ').toLowerCase();
+
+                return searchableText.includes(this.currentSearch);
+            }
+
+            renderEquipment() {
+                const container = document.getElementById('armoryContainer');
+                const noResults = document.getElementById('noResults');
+
+                if (this.filteredEquipment.length === 0) {
+                    container.style.display = 'none';
+                    noResults.style.display = 'block';
+                    return;
+                }
+
+                container.style.display = 'grid';
+                noResults.style.display = 'none';
+
+                container.innerHTML = this.filteredEquipment.map(item => this.createEquipmentCardHTML(item)).join('');
+
+                // Setup equipment card click handlers
+                document.querySelectorAll('.equipment-card').forEach(card => {
+                    const equipmentName = card.dataset.equipment;
+                    card.addEventListener('click', () => this.showEquipmentDetails(equipmentName));
+                });
+            }
+
+            createEquipmentCardHTML(item) {
+                return `
+                    <div class="equipment-card" data-equipment="${item.name}">
+                        <div class="equipment-header">
+                            <img src="assets/images/armory/${item.icon}" alt="${item.name}" class="equipment-icon">
+                            <div class="equipment-info">
+                                <h3>${item.name}</h3>
+                                <div class="equipment-type type-${item.type}">${item.type}</div>
+                            </div>
+                        </div>
+                        
+                        <p class="equipment-description">${item.description}</p>
+                        
+                        <div class="equipment-stats">
+                            <ul class="stats-list">
+                                ${item.effects.slice(0, 3).map(effect => `<li>${effect}</li>`).join('')}
+                                ${item.effects.length > 3 ? '<li style="color: var(--neon-mint); font-style: italic;">And more...</li>' : ''}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+
+            showEquipmentDetails(equipmentName) {
+                const equipment = this.equipment.find(item => item.name === equipmentName);
+                if (!equipment) return;
+
+                const modal = document.getElementById('equipmentModal');
+                const modalName = document.getElementById('modalEquipmentName');
+                const modalType = document.getElementById('modalEquipmentType');
+                const modalContent = document.getElementById('modalEquipmentContent');
+
+                modalName.textContent = equipment.name;
+                modalType.textContent = equipment.type;
+                modalType.className = `equipment-type type-${equipment.type}`;
+
+                modalContent.innerHTML = `
+                    <div class="equipment-detailed">
+                        <img src="assets/images/armory/${equipment.icon}" alt="${equipment.name}" class="equipment-icon">
+                        <div class="equipment-details">
+                            <div class="rarity-indicator rarity-${equipment.rarity}">${equipment.rarity}</div>
+                            <h4>${equipment.category}</h4>
+                            <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem;">${equipment.description}</p>
+                        </div>
+                    </div>
+                    
+                    <h3 style="color: var(--neon-mint); margin-bottom: 1rem;">Effects</h3>
+                    <div class="equipment-stats">
+                        <ul class="stats-list">
+                            ${equipment.effects.map(effect => `<li>${effect}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div style="background: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 1rem; margin-top: 1.5rem;">
+                        <h4 style="color: var(--electric-purple); margin-bottom: 0.5rem;">Usage Tips</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+                            This ${equipment.type} is best used for ${equipment.category.toLowerCase()} strategies. 
+                            Consider pairing with complementary equipment for maximum effectiveness.
+                        </p>
+                    </div>
+                `;
+
+                modal.style.display = 'block';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('equipmentModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('equipmentModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Initialize the armory manager
+        const armoryManager = new ArmoryManager();
+    </script>
+</body>
+</html>

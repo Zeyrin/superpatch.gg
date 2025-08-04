@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patch Notes - SUPERPATCH.GG</title>
+    <meta name="description" content="Complete SUPERVIVE patch notes archive with detailed hunter updates, balance changes, and system modifications.">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <style>
+        /* Patch notes specific styles */
+        
+        /* Less intrusive ads for patch notes page */
+        .ad-container {
+            background: rgba(56, 0, 99, 0.03) !important;
+            border-color: rgba(0, 255, 163, 0.1) !important;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+        
+        .ad-container:hover {
+            opacity: 1;
+            background: rgba(56, 0, 99, 0.05) !important;
+        }
+        
+        .ad-container::before {
+            opacity: 0.3 !important;
+        }
+        
+        .ad-label {
+            opacity: 0.5 !important;
+            font-size: 0.6rem !important;
+        }
+        
+        /* Fix search bar to full width */
+        .search-wrapper {
+            flex: 1;
+            min-width: 300px;
+            width: 100%;
+        }
+
+        .patch-note {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .patch-note::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--neon-mint), var(--electric-purple), var(--neon-pink));
+        }
+
+        .patch-note:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-mint);
+            box-shadow: 0 15px 30px rgba(0, 255, 163, 0.2);
+        }
+
+        .patch-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .patch-title {
+            color: var(--neon-mint);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .patch-date {
+            background: linear-gradient(135deg, var(--electric-purple), var(--neon-pink));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .patch-categories {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .category-tag {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: white;
+        }
+
+        .category-hunters { background: var(--hunter-fighter); }
+        .category-equipment { background: var(--hunter-initiator); }
+        .category-systems { background: var(--hunter-protector); }
+        .category-maps { background: var(--hunter-frontliner); }
+        .category-modes { background: var(--hunter-controller); }
+
+        .patch-content h4 {
+            color: var(--neon-mint);
+            font-size: 1.2rem;
+            margin: 1.5rem 0 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .patch-content h4::before {
+            content: '▶';
+            color: var(--electric-purple);
+        }
+
+        .hunters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .hunter-card {
+            background: rgba(56, 0, 99, 0.1);
+            border: 1px solid var(--border-glow);
+            border-radius: 15px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .hunter-card:hover {
+            border-color: var(--neon-mint);
+            transform: translateY(-2px);
+        }
+
+        .hunter-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .hunter-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--border-glow);
+        }
+
+        .hunter-image-placeholder {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-purple), var(--electric-purple));
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            border: 2px solid var(--border-glow);
+        }
+
+        .hunter-info h5 {
+            color: var(--text-primary);
+            margin: 0 0 0.25rem 0;
+            font-size: 1rem;
+        }
+
+        .hunter-role {
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: white;
+        }
+
+        .role-fighter { background: var(--hunter-fighter); }
+        .role-controller { background: var(--hunter-controller); }
+        .role-protector { background: var(--hunter-protector); }
+        .role-frontliner { background: var(--hunter-frontliner); }
+        .role-initiator { background: var(--hunter-initiator); }
+
+        .hunter-changes {
+            list-style: none;
+            padding: 0;
+        }
+
+        .hunter-changes li {
+            padding: 0.25rem 0;
+            color: var(--text-secondary);
+            position: relative;
+            padding-left: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .hunter-changes li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--neon-pink);
+        }
+
+        .equipment-list, .systems-list, .maps-list, .modes-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .equipment-list li, .systems-list li, .maps-list li, .modes-list li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            position: relative;
+            padding-left: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .equipment-list li::before, .systems-list li::before, .maps-list li::before, .modes-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--electric-purple);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 90%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .modal-close:hover {
+            color: var(--neon-pink);
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-wrapper {
+                min-width: auto;
+            }
+
+            .filter-buttons {
+                justify-content: center;
+            }
+
+            .patch-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .hunters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-grid"></div>
+    
+    <header class="header">
+        <div class="header-content">
+            <div>
+                <a href="./" class="logo">SUPERPATCH.GG</a>
+                <div class="subtitle">SUPERVIVE Patch Notes Archive</div>
+            </div>
+            <nav class="nav-menu">
+                <a href="./" class="nav-link">Home</a>
+                <a href="patches.html" class="nav-link active">Patch Notes</a>
+                <a href="hunters.html" class="nav-link">Hunters</a>
+                <a href="armory.html" class="nav-link">Armory</a>
+                <a href="https://ko-fi.com/superpatchgg" target="_blank" class="coffee-btn">
+                    <span class="coffee-icon">☕</span>
+                    Buy me a coffee
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <section class="hero">
+            <h1 class="page-title">PATCH NOTES</h1>
+            <p class="page-subtitle">
+                Complete archive of all SUPERVIVE updates<br>
+                Track every change since launch with detailed hunter modifications
+            </p>
+        </section>
+
+
+        <section class="search-section">
+            <div class="search-container">
+                <div class="search-wrapper">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        class="search-input" 
+                        placeholder="Search patch notes, hunters, or changes..."
+                    >
+                    <button class="search-clear" aria-label="Clear search" title="Clear search">×</button>
+                </div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-category="all">All</button>
+                    <button class="filter-btn" data-category="hunters">Hunters</button>
+                    <button class="filter-btn" data-category="equipment">Equipment</button>
+                    <button class="filter-btn" data-category="systems">Systems</button>
+                    <button class="filter-btn" data-category="maps">Maps</button>
+                    <button class="filter-btn" data-category="modes">Modes</button>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="patchNotesContainer" class="patch-notes-container">
+            <div class="loading">Loading patch notes...</div>
+        </section>
+
+        <div class="no-results" id="noResults" style="display: none;">
+            <h3>No results found</h3>
+            <p>Try adjusting your search terms or filters</p>
+        </div>
+    </main>
+
+    <!-- Ad Spot: Minimal Footer -->
+    <div class="ad-container ad-footer-banner" style="background: rgba(56, 0, 99, 0.03); border-color: rgba(0, 255, 163, 0.1); margin: 1rem 0;">
+        <div class="ad-label" style="opacity: 0.5;">Advertisement</div>
+        <div class="ad-content" style="min-height: 60px; font-size: 0.8rem; opacity: 0.7;">
+            <!-- Minimal footer ad -->
+            Small Footer Ad (728x60)
+        </div>
+    </div>
+
+    <div id="hunterModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalHunterName"></h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalHunterContent"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 SUPERPATCH.GG - Unofficial SUPERVIVE patch notes archive</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+            Not affiliated with Theorycraft Games. All game content and images belong to their respective owners.
+        </p>
+    </footer>
+
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/ads.js"></script>
+    <script src="assets/js/patch-data.js"></script>
+    <script>
+        class PatchNotesManager {
+            constructor() {
+                this.patchNotes = [];
+                this.filteredNotes = [];
+                this.currentFilter = 'all';
+                this.currentSearch = '';
+                this.patchDataManager = new PatchDataManager();
+                this.init();
+            }
+
+            async init() {
+                await this.loadPatchNotes();
+                this.setupEventListeners();
+                this.setupSearchClear();
+                SuperviveUtils.setActiveNavLink('patches.html');
+                
+                // Check for new patches periodically
+                this.checkForUpdates();
+                setInterval(() => this.checkForUpdates(), 3600000); // Every hour
+            }
+
+            setupSearchClear() {
+                SuperviveUtils.setupSearchClear('#searchInput', () => {
+                    this.currentSearch = '';
+                    this.filterAndRender();
+                });
+            }
+
+            setupEventListeners() {
+                const searchInput = document.getElementById('searchInput');
+                const filterButtons = document.querySelectorAll('.filter-btn');
+
+                searchInput.addEventListener('input', (e) => {
+                    this.currentSearch = e.target.value.toLowerCase();
+                    this.filterAndRender();
+                });
+
+                filterButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        filterButtons.forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentFilter = e.target.dataset.category;
+                        this.filterAndRender();
+                    });
+                });
+            }
+
+            async loadPatchNotes() {
+                SuperviveUtils.showLoading('patchNotesContainer');
+                try {
+                    this.patchNotes = await this.patchDataManager.loadPatches();
+                    this.filteredNotes = [...this.patchNotes];
+                    this.renderPatchNotes();
+                } catch (error) {
+                    console.error('Error loading patch notes:', error);
+                    this.showError('Failed to load patch notes');
+                }
+            }
+
+            async checkForUpdates() {
+                try {
+                    const newPatches = await this.patchDataManager.checkForNewPatches();
+                    if (newPatches.length > 0) {
+                        console.log(`Found ${newPatches.length} new patches!`);
+                        // Add new patches and refresh display
+                        newPatches.forEach(patch => {
+                            this.patchDataManager.addPatch(patch);
+                        });
+                        this.patchNotes = this.patchDataManager.patches;
+                        this.filterAndRender();
+                        this.showUpdateNotification(newPatches.length);
+                    }
+                } catch (error) {
+                    console.error('Error checking for updates:', error);
+                }
+            }
+
+            showUpdateNotification(count) {
+                // Simple notification (could be enhanced with a proper notification system)
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed; top: 20px; right: 20px; z-index: 1000;
+                    background: var(--neon-mint); color: var(--dark-bg); 
+                    padding: 1rem; border-radius: 10px; font-weight: 600;
+                `;
+                notification.textContent = `🎉 ${count} new patch(es) found!`;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 5000);
+            }
+
+            oldLoadPatchNotes() {
+                this.patchNotes = [
+                    {
+                        id: 'patch-1',
+                        title: 'Armory Balance Hotfix',
+                        date: '2025-07-30',
+                        categories: ['systems', 'equipment'],
+                        content: {
+                            systems: [
+                                'Prisma Gems from daily missions increased: 100 → 400 per mission (300% increase)',
+                                'Enhanced rewards to support casual player progression',
+                                'Weekend Events introduced: Double XP, Free Hunter Weekend, Prisma Boost',
+                                'Daily mission completion rate tracking improved'
+                            ],
+                            equipment: [
+                                'Armory progression balance adjustments',
+                                'Prisma costs for certain upgrades reduced',
+                                'Daily mission reward scaling improved'
+                            ]
+                        }
+                    },
+                    {
+                        id: 'patch-2',
+                        title: 'Version 1.0 - Global Launch',
+                        date: '2025-07-24',
+                        categories: ['hunters', 'equipment', 'systems', 'maps', 'modes'],
+                        content: {
+                            hunters: [
+                                {
+                                    name: 'Wukong',
+                                    role: 'fighter',
+                                    image: 'assets/images/hunters/Wukong.png',
+                                    changes: [
+                                        'New hunter release with Version 1.0',
+                                        'Acrobatic fighter specializing in tree perching',
+                                        'Staff-based combat with crowd control abilities'
+                                    ]
+                                },
+                                {
+                                    name: 'Crysta',
+                                    role: 'controller',
+                                    image: 'assets/images/hunters/Crysta.png',
+                                    changes: [
+                                        'New hunter release with Version 1.0',
+                                        'Crystal manipulation specialist',
+                                        'Area control and terrain modification'
+                                    ]
+                                },
+                                {
+                                    name: 'Carbine',
+                                    role: 'fighter',
+                                    image: 'assets/images/hunters/Carbine.png',
+                                    changes: [
+                                        'New hunter release with Version 1.0',
+                                        'High-tech weapons specialist',
+                                        'Precision combat with advanced gadgets'
+                                    ]
+                                },
+                                {
+                                    name: 'Saros',
+                                    role: 'controller',
+                                    image: 'assets/images/hunters/Saros.png',
+                                    changes: [
+                                        'New hunter release with Version 1.0',
+                                        'Time manipulation abilities',
+                                        'Eclipse Portal system for map control'
+                                    ]
+                                },
+                                {
+                                    name: 'Joule',
+                                    role: 'protector',
+                                    image: 'assets/images/hunters/joule.png',
+                                    changes: [
+                                        'New hunter release with Version 1.0',
+                                        'Electric-powered support specialist',
+                                        'Team utility and protection abilities'
+                                    ]
+                                },
+                                {
+                                    name: 'Myth',
+                                    role: 'controller',
+                                    image: 'assets/images/hunters/myth.png',
+                                    changes: [
+                                        'New hunter release with Version 1.0',
+                                        'Mystical abilities and illusions',
+                                        'Deception and area control specialist'
+                                    ]
+                                }
+                            ],
+                            equipment: [
+                                'Complete Armory system overhaul - new 10-slot equipment system',
+                                'Relics: Powerful items with unique passive effects',
+                                'Grips: Weapon modifications affecting attack patterns',
+                                'Kicks: Boots with special movement and utility properties',
+                                'Perks: Passive abilities enhancing hunter capabilities',
+                                'Meta-progression: Account-wide unlocks and improvements',
+                                'Equipment rarity system with visual upgrades',
+                                'Crafting system for creating custom loadouts'
+                            ],
+                            systems: [
+                                'Team composition changed to 3 hunters for more balanced gameplay',
+                                'Prisma currency system introduced for progression',
+                                'Daily missions system with rotating challenges',
+                                'Battle pass progression with seasonal rewards',
+                                'Account level system with unlockable content',
+                                'Social features: friend lists, team formation, messaging'
+                            ],
+                            maps: [
+                                'Map traversal improvements with enhanced movement mechanics',
+                                'Environmental interactions expanded',
+                                'Verticality enhancements to support new hunter abilities',
+                                'Terrain destructibility for dynamic gameplay'
+                            ],
+                            modes: [
+                                'Ranked competitive mode with skill-based matchmaking',
+                                'Quick play for casual matches',
+                                'Custom game modes for community events',
+                                'Training grounds with skill challenges'
+                            ]
+                        }
+                    },
+                    {
+                        id: 'patch-3',
+                        title: 'Pre-Launch Balance Update',
+                        date: '2025-06-25',
+                        categories: ['hunters', 'systems'],
+                        content: {
+                            hunters: [
+                                {
+                                    name: 'Elluna',
+                                    role: 'protector',
+                                    image: 'assets/images/hunters/Elluna.png',
+                                    changes: [
+                                        'Healing effectiveness increased by 15%',
+                                        'Moonlight Dash cooldown reduced: 12s → 10s',
+                                        'Lunar Shield duration extended: 4s → 5s'
+                                    ]
+                                },
+                                {
+                                    name: 'Ghost',
+                                    role: 'fighter',
+                                    image: 'assets/images/hunters/Ghost.png',
+                                    changes: [
+                                        'Invisibility duration increased: 3s → 4s',
+                                        'Backstab damage bonus: 150% → 175%',
+                                        'Movement speed while invisible: +25% → +30%'
+                                    ]
+                                }
+                            ],
+                            systems: [
+                                'Beta testing phase completion',
+                                'Server infrastructure improvements',
+                                'Anti-cheat system implementation',
+                                'Performance optimizations for launch readiness'
+                            ]
+                        }
+                    },
+                    {
+                        id: 'patch-4',
+                        title: 'Beta Phase 3 - Combat Refinements',
+                        date: '2025-06-11',
+                        categories: ['hunters', 'equipment', 'systems'],
+                        content: {
+                            hunters: [
+                                {
+                                    name: 'Jin',
+                                    role: 'controller',
+                                    image: 'assets/images/hunters/Jin.png',
+                                    changes: [
+                                        'Lightning abilities damage scaling improved',
+                                        'Storm Call area of effect increased by 20%',
+                                        'Energy regeneration rate buffed: 5/s → 6/s'
+                                    ]
+                                },
+                                {
+                                    name: 'Felix',
+                                    role: 'frontliner',
+                                    image: 'assets/images/hunters/Felix.png',
+                                    changes: [
+                                        'Shield durability increased: 800 → 900',
+                                        'Charge attack distance: 8m → 10m',
+                                        'Defensive stance damage reduction: 25% → 30%'
+                                    ]
+                                }
+                            ],
+                            equipment: [
+                                'Early Armory prototypes tested',
+                                'Weapon balance adjustments across all categories',
+                                'Equipment slot allocation system refined'
+                            ],
+                            systems: [
+                                'Matchmaking algorithm improvements',
+                                'Performance optimization patches',
+                                'Audio system enhancements'
+                            ]
+                        }
+                    },
+                    {
+                        id: 'patch-5',
+                        title: 'Beta Phase 2 - Hunter Abilities',
+                        date: '2025-05-28',
+                        categories: ['hunters', 'maps'],
+                        content: {
+                            hunters: [
+                                {
+                                    name: 'Brall',
+                                    role: 'fighter',
+                                    image: 'assets/images/hunters/Brall.png',
+                                    changes: [
+                                        'Rage mode duration increased: 6s → 8s',
+                                        'Melee damage scaling improved',
+                                        'Berserker Rush cooldown reduced: 15s → 12s'
+                                    ]
+                                },
+                                {
+                                    name: 'Shiv',
+                                    role: 'fighter',
+                                    image: 'assets/images/hunters/Shiv.png',
+                                    changes: [
+                                        'Blade Dance combo system enhanced',
+                                        'Critical strike chance increased: 15% → 20%',
+                                        'Mobility during abilities improved'
+                                    ]
+                                }
+                            ],
+                            maps: [
+                                'Map geometry refinements for better flow',
+                                'Environmental hazard adjustments',
+                                'Spawn location optimization'
+                            ]
+                        }
+                    },
+                    {
+                        id: 'patch-6',
+                        title: 'Beta Phase 1 - Foundation Systems',
+                        date: '2025-05-14',
+                        categories: ['systems', 'modes'],
+                        content: {
+                            systems: [
+                                'Core gameplay mechanics established',
+                                'Hunter selection system implemented',
+                                'Basic progression framework',
+                                'Initial balance parameters set'
+                            ],
+                            modes: [
+                                'Primary game mode structure defined',
+                                'Match flow and victory conditions',
+                                'Respawn and elimination mechanics',
+                                'Team coordination features'
+                            ]
+                        }
+                    }
+                ];
+
+                // Initialize filteredNotes with all patch notes for default display
+                this.filteredNotes = [...this.patchNotes];
+                this.renderPatchNotes();
+            }
+
+            filterAndRender() {
+                this.filteredNotes = this.patchNotes.filter(note => {
+                    const matchesCategory = this.currentFilter === 'all' || note.categories.includes(this.currentFilter);
+                    const matchesSearch = this.currentSearch === '' || this.matchesSearchTerm(note);
+                    return matchesCategory && matchesSearch;
+                });
+
+                this.renderPatchNotes();
+            }
+
+            matchesSearchTerm(note) {
+                const searchableText = [
+                    note.title,
+                    note.date,
+                    ...note.categories,
+                    JSON.stringify(note.content)
+                ].join(' ').toLowerCase();
+
+                return searchableText.includes(this.currentSearch);
+            }
+
+            renderPatchNotes() {
+                const container = document.getElementById('patchNotesContainer');
+                const noResults = document.getElementById('noResults');
+
+                if (this.filteredNotes.length === 0) {
+                    container.style.display = 'none';
+                    noResults.style.display = 'block';
+                    return;
+                }
+
+                container.style.display = 'block';
+                noResults.style.display = 'none';
+
+                container.innerHTML = this.filteredNotes.map(note => this.createPatchNoteHTML(note)).join('');
+
+                // Setup hunter card click handlers
+                document.querySelectorAll('.hunter-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const hunterName = card.dataset.hunter;
+                        this.showHunterDetails(hunterName);
+                    });
+                });
+            }
+
+            createPatchNoteHTML(note) {
+                const formattedDate = SuperviveUtils.formatDate(note.date);
+                
+                return `
+                    <div class="patch-note" id="${note.id}">
+                        <div class="patch-header">
+                            <h2 class="patch-title">${note.title}</h2>
+                            <span class="patch-date">${formattedDate}</span>
+                        </div>
+                        
+                        <div class="patch-categories">
+                            ${note.categories.map(cat => `<span class="category-tag category-${cat}">${cat}</span>`).join('')}
+                        </div>
+                        
+                        <div class="patch-content">
+                            ${this.renderPatchContent(note.content)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderPatchContent(content) {
+                let html = '';
+
+                if (content.hunters && content.hunters.length > 0) {
+                    html += `
+                        <h4>🏹 Hunter Updates</h4>
+                        <div class="hunters-grid">
+                            ${content.hunters.map(hunter => this.createHunterCardHTML(hunter)).join('')}
+                        </div>
+                    `;
+                }
+
+                if (content.equipment && content.equipment.length > 0) {
+                    html += `
+                        <h4>⚔️ Equipment & Armory</h4>
+                        <ul class="equipment-list">
+                            ${content.equipment.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                    `;
+                }
+
+                if (content.systems && content.systems.length > 0) {
+                    html += `
+                        <h4>⚙️ Systems & Features</h4>
+                        <ul class="systems-list">
+                            ${content.systems.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                    `;
+                }
+
+                if (content.maps && content.maps.length > 0) {
+                    html += `
+                        <h4>🗺️ Maps & Environment</h4>
+                        <ul class="maps-list">
+                            ${content.maps.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                    `;
+                }
+
+                if (content.modes && content.modes.length > 0) {
+                    html += `
+                        <h4>🎮 Game Modes</h4>
+                        <ul class="modes-list">
+                            ${content.modes.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                    `;
+                }
+
+                return html;
+            }
+
+            createHunterCardHTML(hunter) {
+                return `
+                    <div class="hunter-card" data-hunter="${hunter.name}">
+                        <div class="hunter-header">
+                            <img src="${hunter.image}" alt="${hunter.name}" class="hunter-image" 
+                                 onerror="SuperviveUtils.handleImageError(this, '${hunter.name}')">
+                            <div class="hunter-image-placeholder">${hunter.name.substring(0, 2).toUpperCase()}</div>
+                            <div class="hunter-info">
+                                <h5>${hunter.name}</h5>
+                                <div class="hunter-role role-${hunter.role}">${hunter.role}</div>
+                            </div>
+                        </div>
+                        <ul class="hunter-changes">
+                            ${hunter.changes.map(change => `<li>${change}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            showHunterDetails(hunterName) {
+                // This would show detailed hunter information in a modal
+                // For now, we'll show basic info
+                const modal = document.getElementById('hunterModal');
+                const modalName = document.getElementById('modalHunterName');
+                const modalContent = document.getElementById('modalHunterContent');
+
+                modalName.textContent = hunterName;
+                modalContent.innerHTML = `
+                    <p>Detailed information for ${hunterName} would be displayed here.</p>
+                    <p>This would include abilities, complete patch history, and role information.</p>
+                `;
+
+                modal.style.display = 'block';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('hunterModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('hunterModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Initialize the patch notes manager
+        const patchManager = new PatchNotesManager();
+
+        // Check for URL parameters (hunter filter from hunters page)
+        const urlParams = new URLSearchParams(window.location.search);
+        const hunterFilter = urlParams.get('hunter');
+        if (hunterFilter) {
+            document.getElementById('searchInput').value = hunterFilter;
+            patchManager.currentSearch = hunterFilter.toLowerCase();
+            patchManager.filterAndRender();
+        }
+    </script>
+</body>
+</html>

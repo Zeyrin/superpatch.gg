@@ -1,0 +1,47 @@
+name: Auto Patch Scraper
+
+on:
+  schedule:
+    # Run once per day at 9 AM UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch: # Allow manual trigger
+  
+jobs:
+  scrape-patches:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Run patch scraper
+      run: |
+        node scripts/steam-rss-scraper.js
+        
+    - name: Check for changes
+      id: git-check
+      run: |
+        git diff --exit-code assets/data/patches.json || echo "changes=true" >> $GITHUB_OUTPUT
+        
+    - name: Commit and push changes
+      if: steps.git-check.outputs.changes == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add assets/data/patches.json
+        git add scripts/last-check.txt
+        git commit -m "🤖 Auto-update: New patch data from Steam RSS"
+        git push
+        
+    - name: Create deployment
+      if: steps.git-check.outputs.changes == 'true'
+      run: |
+        echo "New patches detected and committed!"
+        echo "Deploy your site to see the updates."
