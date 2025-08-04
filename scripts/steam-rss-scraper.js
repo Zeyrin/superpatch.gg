@@ -7,7 +7,7 @@ const path = require('path');
 
 class SteamRssScraper {
     constructor() {
-        this.appId = '1283780'; // SUPERVIVE Steam App ID
+        this.appId = '1283700'; // SUPERVIVE Steam App ID (corrected)
         this.rssUrl = `https://store.steampowered.com/feeds/news/app/${this.appId}/`;
         this.patchesFile = path.join(__dirname, '..', 'assets', 'data', 'patches.json');
         this.lastCheckFile = path.join(__dirname, 'last-check.txt');
@@ -26,6 +26,8 @@ class SteamRssScraper {
                 });
                 
                 res.on('end', () => {
+                    console.log(`Fetched ${data.length} characters from RSS feed`);
+                    console.log('First 500 characters:', data.substring(0, 500));
                     resolve(data);
                 });
                 
@@ -43,16 +45,23 @@ class SteamRssScraper {
         const itemRegex = /<item>(.*?)<\/item>/gs;
         const items = xmlData.match(itemRegex) || [];
         
-        items.forEach(item => {
+        console.log(`Found ${items.length} RSS items to process`);
+        
+        items.forEach((item, index) => {
             const title = this.extractXmlTag(item, 'title');
             const link = this.extractXmlTag(item, 'link');
             const pubDate = this.extractXmlTag(item, 'pubDate');
             const description = this.extractXmlTag(item, 'description');
             
+            console.log(`Item ${index + 1}: "${title}"`);
+            
             // Only process if it looks like a patch note
             if (this.isPatchNote(title, description)) {
+                console.log(`  ✓ Identified as patch note`);
                 const patch = this.createPatchObject(title, link, pubDate, description);
                 patches.push(patch);
+            } else {
+                console.log(`  ✗ Not a patch note`);
             }
         });
         
@@ -66,15 +75,28 @@ class SteamRssScraper {
         return match ? match[1].trim() : '';
     }
 
-    // Check if the post is a patch note
+    // Enhanced patch note detection
     isPatchNote(title, description) {
         const patchKeywords = [
             'patch', 'update', 'hotfix', 'balance', 'nerf', 'buff',
-            'version', 'changelog', 'fix', 'adjustment', 'improvement'
+            'version', 'changelog', 'fix', 'adjustment', 'improvement',
+            'notes', 'changes', 'maintenance', 'stability', 'performance',
+            'hunter', 'armory', 'prisma', 'rework', 'launch'
+        ];
+        
+        // Exclude non-patch content
+        const excludeKeywords = [
+            'event', 'sale', 'discount', 'announcement', 'trailer',
+            'dev diary', 'interview', 'community', 'stream', 'contest'
         ];
         
         const text = (title + ' ' + description).toLowerCase();
-        return patchKeywords.some(keyword => text.includes(keyword));
+        
+        const hasPatchKeyword = patchKeywords.some(keyword => text.includes(keyword));
+        const hasExcludeKeyword = excludeKeywords.some(keyword => text.includes(keyword));
+        
+        // Must have patch keywords and not have exclude keywords
+        return hasPatchKeyword && !hasExcludeKeyword;
     }
 
     // Create structured patch object
@@ -96,15 +118,37 @@ class SteamRssScraper {
         };
     }
 
-    // Clean HTML from text
+    // Enhanced HTML cleaning with better formatting
     cleanHtml(html) {
         return html
-            .replace(/<[^>]*>/g, '') // Remove HTML tags
+            // Convert common HTML structures to readable text
+            .replace(/<br\s*\/?>/gi, '\n') // Convert <br> to newlines
+            .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n') // Convert </p><p> to double newlines
+            .replace(/<p[^>]*>/gi, '') // Remove opening <p> tags
+            .replace(/<\/p>/gi, '\n') // Convert closing </p> to newline
+            .replace(/<\/li>\s*<li[^>]*>/gi, '\n• ') // Convert </li><li> to bullet points
+            .replace(/<li[^>]*>/gi, '• ') // Convert <li> to bullets
+            .replace(/<\/li>/gi, '') // Remove closing </li>
+            .replace(/<ul[^>]*>|<\/ul>/gi, '') // Remove <ul> tags
+            .replace(/<ol[^>]*>|<\/ol>/gi, '') // Remove <ol> tags
+            .replace(/<div[^>]*class="bb_h[1-6]"[^>]*>/gi, '\n### ') // Convert headers
+            .replace(/<\/div>/gi, '') // Remove closing divs
+            .replace(/<blockquote[^>]*>/gi, '\n> ') // Convert blockquotes
+            .replace(/<\/blockquote>/gi, '\n') // Close blockquotes
+            .replace(/<b[^>]*>|<\/b>/gi, '**') // Convert bold to markdown
+            .replace(/<i[^>]*>|<\/i>/gi, '*') // Convert italic to markdown
+            .replace(/<[^>]*>/g, '') // Remove all remaining HTML tags
+            // Clean up HTML entities
             .replace(/&lt;/g, '<')
             .replace(/&gt;/g, '>')
             .replace(/&amp;/g, '&')
             .replace(/&quot;/g, '"')
             .replace(/&#x27;/g, "'")
+            .replace(/&nbsp;/g, ' ')
+            // Clean up whitespace and formatting
+            .replace(/\n\s*\n\s*\n/g, '\n\n') // Remove extra newlines
+            .replace(/^\s+|\s+$/gm, '') // Trim lines
+            .replace(/\s+/g, ' ') // Normalize spaces within lines
             .trim();
     }
 
@@ -123,7 +167,7 @@ class SteamRssScraper {
             : firstSentence + '.';
     }
 
-    // Parse changes from description
+    // Parse changes from description with enhanced extraction
     parseChanges(content) {
         const changes = {
             hunters: [],
@@ -133,35 +177,105 @@ class SteamRssScraper {
             modes: []
         };
 
+        // Enhanced keyword sets for better categorization
         const keywords = {
-            hunters: ['hunter', 'ability', 'passive', 'ultimate', 'damage', 'cooldown', 'mana', 'health'],
-            equipment: ['armor', 'weapon', 'item', 'relic', 'grip', 'kick', 'perk', 'armory'],
-            systems: ['matchmaking', 'progression', 'xp', 'ranking', 'ui', 'interface', 'currency'],
-            maps: ['map', 'terrain', 'spawn', 'objective', 'zone'],
-            modes: ['mode', 'gamemode', 'pvp', 'ranked', 'casual', 'tournament']
+            hunters: [
+                'hunter', 'ability', 'passive', 'ultimate', 'damage', 'cooldown', 'mana', 'health',
+                'elluna', 'wukong', 'ghost', 'saros', 'crysta', 'carbine', 'joule', 'myth',
+                'beebo', 'bishop', 'brall', 'celeste', 'eva', 'felix', 'hudson', 'jin',
+                'kingpin', 'oath', 'shiv', 'shrike', 'void', 'zeph', 'skill', 'talent'
+            ],
+            equipment: [
+                'armor', 'weapon', 'item', 'relic', 'grip', 'kick', 'perk', 'armory',
+                'equipment', 'gear', 'artifact', 'accessory', 'enhancement', 'upgrade',
+                'crafting', 'forge', 'materials', 'resources', 'legendary', 'epic', 'rare'
+            ],
+            systems: [
+                'matchmaking', 'progression', 'xp', 'ranking', 'ui', 'interface', 'currency',
+                'prisma', 'gems', 'battle pass', 'daily', 'weekly', 'mission', 'quest',
+                'reward', 'unlock', 'achievement', 'leaderboard', 'season', 'account'
+            ],
+            maps: [
+                'map', 'terrain', 'spawn', 'objective', 'zone', 'environment', 'collision',
+                'geometry', 'navigation', 'pathing', 'breach', 'megamap', 'area', 'region'
+            ],
+            modes: [
+                'mode', 'gamemode', 'pvp', 'ranked', 'casual', 'tournament', 'competitive',
+                'queue', 'matchmaking', 'lobby', 'custom', 'practice', 'training'
+            ]
         };
 
-        const lines = content.toLowerCase().split(/[.\n\r]+/);
+        // Split content into sentences and bullet points for better parsing
+        const sentences = content.split(/[.\n\r•\-\*]+/).map(s => s.trim()).filter(s => s.length > 10);
         
-        lines.forEach(line => {
-            const trimmedLine = line.trim();
-            if (trimmedLine.length < 15) return; // Skip very short lines
+        sentences.forEach(sentence => {
+            const lowerSentence = sentence.toLowerCase();
+            
+            // Extract numerical changes (damage, cooldown, percentages, etc.)
+            const hasNumbers = /\d+/.test(sentence);
+            const hasArrow = /→|->|increased|decreased|reduced|buffed|nerfed/i.test(sentence);
             
             Object.keys(keywords).forEach(category => {
                 const hasKeyword = keywords[category].some(keyword => 
-                    trimmedLine.includes(keyword)
+                    lowerSentence.includes(keyword.toLowerCase())
                 );
                 
-                if (hasKeyword && changes[category].length < 5) {
-                    changes[category].push({
-                        description: trimmedLine.charAt(0).toUpperCase() + trimmedLine.slice(1),
-                        type: this.determineChangeType(trimmedLine)
-                    });
+                if (hasKeyword && changes[category].length < 10) {
+                    const changeType = this.determineChangeType(sentence);
+                    const priority = this.getChangePriority(sentence, hasNumbers, hasArrow);
+                    
+                    if (priority > 0) {
+                        changes[category].push({
+                            description: this.cleanDescription(sentence),
+                            type: changeType,
+                            priority: priority
+                        });
+                    }
                 }
             });
         });
 
+        // Sort changes by priority (most important first)
+        Object.keys(changes).forEach(category => {
+            changes[category].sort((a, b) => (b.priority || 0) - (a.priority || 0));
+        });
+
         return changes;
+    }
+
+    // Get priority score for changes (higher = more important)
+    getChangePriority(text, hasNumbers, hasArrow) {
+        let priority = 1;
+        
+        // Higher priority for numerical changes
+        if (hasNumbers) priority += 2;
+        if (hasArrow) priority += 2;
+        
+        // Higher priority for specific hunter names
+        const hunterNames = ['elluna', 'wukong', 'ghost', 'saros', 'crysta', 'carbine'];
+        if (hunterNames.some(name => text.toLowerCase().includes(name))) priority += 3;
+        
+        // Higher priority for balance changes
+        if (/buff|nerf|balance|adjust|fix/i.test(text)) priority += 2;
+        
+        // Higher priority for system changes
+        if (/prisma|gem|xp|reward|progression/i.test(text)) priority += 2;
+        
+        return priority;
+    }
+
+    // Clean up description text with HTML cleaning
+    cleanDescription(text) {
+        const cleaned = this.cleanHtml(text)
+            .replace(/^\s*[-•*]\s*/, '') // Remove bullet points
+            .replace(/\s+/g, ' ') // Normalize whitespace
+            .replace(/^[:\-\s]*/, '') // Remove leading colons/dashes
+            .trim();
+        
+        // Capitalize first letter if text exists
+        return cleaned.length > 0 
+            ? cleaned.charAt(0).toUpperCase() + cleaned.slice(1)
+            : cleaned;
     }
 
     // Determine type of change

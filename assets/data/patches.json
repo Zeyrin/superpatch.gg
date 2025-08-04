@@ -1,79 +1,269 @@
 [
   {
-    "id": "patch-1",
-    "title": "July 30 - Armory Balance Hotfix",
+    "id": "patch-july-30-2025",
+    "title": "July 30 - Hotfix Patch Notes",
     "date": "2025-07-30",
     "version": "1.0.1",
-    "steamUrl": "https://store.steampowered.com/news/app/1283780",
-    "summary": "Prisma Gems from daily missions increased and weekend events introduced to support casual player progression.",
+    "steamUrl": "https://store.steampowered.com/news/app/1283700/view/516342955916656641",
+    "summary": "Balance adjustments and progression improvements following the 1.0 launch, including Prisma Gem reward increases and hunter balance tweaks.",
     "changes": {
-      "hunters": [],
-      "equipment": [],
-      "systems": [
+      "hunters": [
         {
-          "description": "Prisma Gems from daily missions increased: 100 → 400 per mission (300% increase)",
+          "description": "Brall and Shiv received nerfs over the weekend to address overperformance",
+          "type": "nerf"
+        },
+        {
+          "description": "Wukong and Jin's movement adjusted so their LMBs don't make them quite so slippery",
+          "type": "nerf"
+        },
+        {
+          "description": "Individual Hunter winrates being monitored across different MMRs for future balance adjustments",
+          "type": "change"
+        }
+      ],
+      "equipment": [
+        {
+          "description": "Prisma crafting cost of daily & weekly specials in the Forge reduced to 1000 Prisma each",
           "type": "buff"
         },
         {
-          "description": "Enhanced rewards to support casual player progression",
-          "type": "improvement"
+          "description": "Increased the number of items on offer in the Forge specials",
+          "type": "buff"
         },
         {
-          "description": "Weekend Events: Double XP, Free Hunter Weekend, Prisma Boost",
+          "description": "All Vaults now guarantee at least one grip or relic",
+          "type": "buff"
+        },
+        {
+          "description": "Vault equipment drops have a base 20% chance to be 2 star",
+          "type": "buff"
+        },
+        {
+          "description": "Bad-luck protection added to legendary capsule drops",
+          "type": "improvement"
+        }
+      ],
+      "systems": [
+        {
+          "description": "Daily quest Prisma rewards increased: 100 → 400 per quest (300% increase)",
+          "type": "buff"
+        },
+        {
+          "description": "Overall Prisma gains from both PvE and PvP interactions buffed",
+          "type": "buff"
+        },
+        {
+          "description": "Prisma drop on death reduced: 50% → 33%",
+          "type": "buff"
+        },
+        {
+          "description": "Minimum Prisma received from kills increased: 8 → 15 (guaranteed amount)",
+          "type": "buff"
+        },
+        {
+          "description": "Prisma multiplier for top 3 lobby placement slightly decreased",
+          "type": "nerf"
+        },
+        {
+          "description": "Prisma multiplier for placing 5th or 6th increased",
+          "type": "buff"
+        }
+      ],
+      "maps": [
+        {
+          "description": "Monitoring characters with dunking abilities due to updated glider and map layout",
+          "type": "change"
+        }
+      ],
+      "modes": [
+        {
+          "description": "Arena mode now earns Prisma rewards (previously didn't reward Prisma)",
           "type": "new"
+        },
+        {
+          "description": "Arena visual upgrades planned for near future",
+          "type": "change"
+        }
+      ]
+    },
+    "rawContent": "Balance adjustments following 1.0 launch with focus on Prisma progression improvements and hunter balance tweaks.",
+    "addedAt": "2025-08-04T22:20:00.000Z"
+  },
+  {
+    "id": "patch-june-25-2025",
+    "title": "June 25 - Bugfixing on the road to 1.0!",
+    "date": "2025-06-25",
+    "version": "0.25",
+    "steamUrl": "https://store.steampowered.com/news/app/1283700/view/580514905803724092",
+    "summary": "Comprehensive bugfix patch addressing hunter-specific issues ahead of the 1.0 launch.",
+    "changes": {
+      "hunters": [
+        {
+          "description": "Beebo: Can no longer speed himself up during Tonk Tonk (R) by using Pull Zeep (RMB)",
+          "type": "fix"
+        },
+        {
+          "description": "Beebo: Tonk Tonk! (R) no longer snaps camera to origin",
+          "type": "fix"
+        },
+        {
+          "description": "Beebo: Super Zeep (RMB) more reliably hits targets above/below",
+          "type": "fix"
+        },
+        {
+          "description": "Void: Empowered state now correctly increases Black Hole size",
+          "type": "fix"
+        },
+        {
+          "description": "Void: Singularity (R) no longer destroys allied destructibles",
+          "type": "fix"
+        },
+        {
+          "description": "Felix: Zero Star skin Embry Bolt (RMB) VFX now match functional width",
+          "type": "fix"
+        },
+        {
+          "description": "Ghost/Saros: Models no longer hidden when interrupting Recall with RMB",
+          "type": "fix"
+        },
+        {
+          "description": "Eva/Saros: Hunter spells with charges correctly reset on Team Wipe",
+          "type": "fix"
+        },
+        {
+          "description": "Shrike: Truetalon Rifle laser correctly climbs high ground",
+          "type": "fix"
+        }
+      ],
+      "equipment": [],
+      "systems": [
+        {
+          "description": "Sneaking/Aiming in Death Circle no longer causes stuck state",
+          "type": "fix"
+        },
+        {
+          "description": "Bosses now move again after landing",
+          "type": "fix"
         }
       ],
       "maps": [],
       "modes": []
     },
-    "rawContent": "We've heard your feedback about progression pacing and are making immediate improvements to support casual players..."
+    "rawContent": "Major bugfix patch addressing numerous hunter-specific issues and system bugs ahead of 1.0 launch.",
+    "addedAt": "2025-08-04T22:20:00.000Z"
   },
   {
-    "id": "patch-2",
-    "title": "Version 1.0 - Global Launch",
-    "date": "2025-07-24",
-    "version": "1.0.0",
-    "steamUrl": "https://store.steampowered.com/news/app/1283780",
-    "summary": "Complete game overhaul with new Armory system, team size changes, and six new hunters added to the roster.",
+    "id": "patch-june-11-2025",
+    "title": "June 11 - Warmup, Challenge Rooms, Balancing, and more!",
+    "date": "2025-06-11",
+    "version": "0.24",
+    "steamUrl": "https://store.steampowered.com/news/app/1283700/view/516337249186483633",
+    "summary": "Major content update introducing Warmup mode, Challenge Rooms, Directional Influence system, and extensive hunter balance changes.",
     "changes": {
       "hunters": [
         {
-          "description": "New hunters: Wukong, Crysta, Carbine, Saros, Joule, Myth",
-          "type": "new"
+          "description": "Zeph: Cyclone Dash cooldown increased by 0.5 seconds at all levels",
+          "type": "nerf"
         },
         {
-          "description": "All existing hunters rebalanced for 3v3 gameplay",
-          "type": "rework"
+          "description": "Void: Swap cooldown increased by 0.5 seconds at all levels",
+          "type": "nerf"
+        },
+        {
+          "description": "Ghost: Spike Grenade bonus damage to MK7 Glyph Rifle decreased by 15%",
+          "type": "nerf"
+        },
+        {
+          "description": "Ghost: Combat Slide cooldown increased by 0.5 seconds at all levels",
+          "type": "nerf"
+        },
+        {
+          "description": "Carbine: XT3 Heavy Blaster first shot damage reduced by ~45%",
+          "type": "nerf"
+        },
+        {
+          "description": "Hudson: Turn rate restriction at max heat improved: 25°/sec → 45°/sec",
+          "type": "buff"
+        },
+        {
+          "description": "Hudson: Movement speed slow at max heat reduced: 80% → 70%",
+          "type": "buff"
+        },
+        {
+          "description": "Hudson: Spun-Up base bullet damage increased ~6.5%",
+          "type": "buff"
+        },
+        {
+          "description": "Hudson: Barbed Wire arm duration: 0.6s → 0.45s",
+          "type": "buff"
+        },
+        {
+          "description": "Shrike: Base movement speed increased: 475 → 490",
+          "type": "buff"
+        },
+        {
+          "description": "Oath: Brightshield now immune to Machine Lasers/Placeable Lasers",
+          "type": "buff"
+        },
+        {
+          "description": "Multiple hunter bugfixes for Beebo, Shrike, Elluna, Felix, Saros",
+          "type": "fix"
         }
       ],
       "equipment": [
         {
-          "description": "Complete Armory system overhaul with new item categories",
-          "type": "rework"
-        },
-        {
-          "description": "New relic, grip, kick, and perk systems introduced",
-          "type": "new"
+          "description": "EMP Grenades now deal 99999 damage to armor",
+          "type": "buff"
         }
       ],
       "systems": [
         {
-          "description": "Team size changed from 4 to 3 hunters for balanced gameplay",
+          "description": "Circle Damage now deals true damage, cannot be mitigated",
           "type": "change"
         },
         {
-          "description": "New progression system with Prisma Gems currency",
+          "description": "Most Wanted EXP completion reward capped at daily level limit",
+          "type": "change"
+        },
+        {
+          "description": "Directional Influence (DI) system introduced for knockback control",
           "type": "new"
+        },
+        {
+          "description": "Supporter pack pedestals made permanent",
+          "type": "improvement"
         }
       ],
       "maps": [
         {
-          "description": "Map layouts adjusted for 3v3 team compositions",
-          "type": "change"
+          "description": "Audio fixes: Base Camp Capture, Anomaly SFX, Recall SFX",
+          "type": "fix"
+        },
+        {
+          "description": "Megamap zoom issue fixed",
+          "type": "fix"
         }
       ],
-      "modes": []
+      "modes": [
+        {
+          "description": "Warmup mode added - endless deathmatch practice while queueing",
+          "type": "new"
+        },
+        {
+          "description": "Challenge Rooms added - 3 new rooms testing different skills",
+          "type": "new"
+        },
+        {
+          "description": "Tutorial added - covers basics and rewards Ghost unlock",
+          "type": "new"
+        },
+        {
+          "description": "Practice mode improvements - better party management",
+          "type": "improvement"
+        }
+      ]
     },
-    "rawContent": "Welcome to SUPERVIVE 1.0! After months of testing and feedback, we're excited to launch the full version..."
+    "rawContent": "Major feature update introducing Warmup mode, Challenge Rooms, and extensive balance changes in preparation for 1.0.",
+    "addedAt": "2025-08-04T22:20:00.000Z"
   }
 ]

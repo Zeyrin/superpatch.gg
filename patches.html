@@ -122,11 +122,37 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+
+        .patch-content h4:hover {
+            color: var(--neon-pink);
         }
 
         .patch-content h4::before {
-            content: '▶';
+            content: '▼';
             color: var(--electric-purple);
+            transition: transform 0.3s ease;
+            font-size: 0.8em;
+        }
+
+        .patch-content h4.collapsed::before {
+            transform: rotate(-90deg);
+        }
+
+        .patch-section-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            max-height: 1000px;
+            opacity: 1;
+        }
+
+        .patch-section-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
         }
 
         .hunters-grid {
@@ -486,16 +512,33 @@
                             categories.push(category);
                             
                             if (category === 'hunters') {
-                                // Handle hunters specially - create proper hunter objects
-                                content[category] = note.changes[category].map(change => ({
-                                    name: this.extractHunterName(change.description),
-                                    role: 'fighter', // Default role - could be improved
-                                    image: `assets/images/hunters/${this.extractHunterName(change.description)}.png`,
-                                    changes: [change.description]
-                                }));
+                                // Handle hunters - check if they're already objects or just strings
+                                content[category] = note.changes[category].map(change => {
+                                    if (typeof change === 'object' && change.description) {
+                                        // New format with description and type
+                                        const hunterName = this.extractHunterName(change.description);
+                                        return {
+                                            name: hunterName,
+                                            role: this.getHunterRole(hunterName),
+                                            image: `assets/images/hunters/${hunterName}.png`,
+                                            changes: [change.description]
+                                        };
+                                    } else {
+                                        // Old format - just strings
+                                        const hunterName = this.extractHunterName(change);
+                                        return {
+                                            name: hunterName,
+                                            role: this.getHunterRole(hunterName),
+                                            image: `assets/images/hunters/${hunterName}.png`,
+                                            changes: [change]
+                                        };
+                                    }
+                                });
                             } else {
                                 // Handle other categories as simple arrays
-                                content[category] = note.changes[category].map(change => change.description);
+                                content[category] = note.changes[category].map(change => 
+                                    typeof change === 'object' && change.description ? change.description : change
+                                );
                             }
                         }
                     });
@@ -508,6 +551,34 @@
                     categories: categories,
                     content: content
                 };
+            }
+
+            getHunterRole(hunterName) {
+                const hunterRoles = {
+                    'Beebo': 'fighter',
+                    'Bishop': 'controller',
+                    'Brall': 'fighter',
+                    'Carbine': 'fighter',
+                    'Celeste': 'controller',
+                    'Crysta': 'controller',
+                    'Elluna': 'protector',
+                    'Eva': 'controller',
+                    'Felix': 'frontliner',
+                    'Ghost': 'fighter',
+                    'Hudson': 'fighter',
+                    'Jin': 'controller',
+                    'Joule': 'protector',
+                    'Kingpin': 'initiator',
+                    'Myth': 'controller',
+                    'Oath': 'frontliner',
+                    'Saros': 'controller',
+                    'Shiv': 'fighter',
+                    'Shrike': 'fighter',
+                    'Void': 'controller',
+                    'Wukong': 'fighter',
+                    'Zeph': 'initiator'
+                };
+                return hunterRoles[hunterName] || 'fighter';
             }
 
             extractHunterName(description) {
@@ -898,46 +969,56 @@
 
                 if (content.hunters && content.hunters.length > 0) {
                     html += `
-                        <h4>🏹 Hunter Updates</h4>
-                        <div class="hunters-grid">
-                            ${content.hunters.map(hunter => this.createHunterCardHTML(hunter)).join('')}
+                        <h4 onclick="this.parentNode.querySelector('[data-section=hunters]').classList.toggle('collapsed'); this.classList.toggle('collapsed')">🏹 Hunter Updates</h4>
+                        <div class="patch-section-content" data-section="hunters">
+                            <div class="hunters-grid">
+                                ${content.hunters.map(hunter => this.createHunterCardHTML(hunter)).join('')}
+                            </div>
                         </div>
                     `;
                 }
 
                 if (content.equipment && content.equipment.length > 0) {
                     html += `
-                        <h4>⚔️ Equipment & Armory</h4>
-                        <ul class="equipment-list">
-                            ${content.equipment.map(item => `<li>${item}</li>`).join('')}
-                        </ul>
+                        <h4 onclick="this.parentNode.querySelector('[data-section=equipment]').classList.toggle('collapsed'); this.classList.toggle('collapsed')">⚔️ Equipment & Armory</h4>
+                        <div class="patch-section-content" data-section="equipment">
+                            <ul class="equipment-list">
+                                ${content.equipment.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
                     `;
                 }
 
                 if (content.systems && content.systems.length > 0) {
                     html += `
-                        <h4>⚙️ Systems & Features</h4>
-                        <ul class="systems-list">
-                            ${content.systems.map(item => `<li>${item}</li>`).join('')}
-                        </ul>
+                        <h4 onclick="this.parentNode.querySelector('[data-section=systems]').classList.toggle('collapsed'); this.classList.toggle('collapsed')">⚙️ Systems & Features</h4>
+                        <div class="patch-section-content" data-section="systems">
+                            <ul class="systems-list">
+                                ${content.systems.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
                     `;
                 }
 
                 if (content.maps && content.maps.length > 0) {
                     html += `
-                        <h4>🗺️ Maps & Environment</h4>
-                        <ul class="maps-list">
-                            ${content.maps.map(item => `<li>${item}</li>`).join('')}
-                        </ul>
+                        <h4 onclick="this.parentNode.querySelector('[data-section=maps]').classList.toggle('collapsed'); this.classList.toggle('collapsed')">🗺️ Maps & Environment</h4>
+                        <div class="patch-section-content" data-section="maps">
+                            <ul class="maps-list">
+                                ${content.maps.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
                     `;
                 }
 
                 if (content.modes && content.modes.length > 0) {
                     html += `
-                        <h4>🎮 Game Modes</h4>
-                        <ul class="modes-list">
-                            ${content.modes.map(item => `<li>${item}</li>`).join('')}
-                        </ul>
+                        <h4 onclick="this.parentNode.querySelector('[data-section=modes]').classList.toggle('collapsed'); this.classList.toggle('collapsed')">🎮 Game Modes</h4>
+                        <div class="patch-section-content" data-section="modes">
+                            <ul class="modes-list">
+                                ${content.modes.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
                     `;
                 }
 
