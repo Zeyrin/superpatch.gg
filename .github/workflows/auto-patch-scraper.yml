@@ -36,18 +36,22 @@ jobs:
       run: |
         git diff --exit-code assets/data/patches.json || echo "changes=true" >> $GITHUB_OUTPUT
         
-    - name: Commit and push changes
+    - name: Create GitHub issue
       if: steps.git-check.outputs.changes == 'true'
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add assets/data/patches.json
-        git add scripts/last-check.txt
-        git commit -m "🤖 Auto-update: New patch data from Steam RSS"
-        git push
-        
-    - name: Create deployment
-      if: steps.git-check.outputs.changes == 'true'
-      run: |
-        echo "New patches detected and committed!"
-        echo "Deploy your site to see the updates."
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: '🎮 New Supervive Patch Detected - Manual Update Needed',
+            body: `New patch data has been detected from the Steam RSS feed!
+            
+            **Action Required:** Please review and manually update the patch notes.
+            
+            **Workflow Run:** ${context.payload.repository.html_url}/actions/runs/${context.runId}
+            **Detection Time:** ${new Date().toISOString()}
+            
+            Please check the latest patch data and update the site accordingly.`,
+            labels: ['patch-update', 'manual-review']
+          })
