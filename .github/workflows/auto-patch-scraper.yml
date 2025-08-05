@@ -24,6 +24,9 @@ jobs:
       with:
         node-version: '18'
         
+    - name: Install dependencies
+      run: npm install
+        
     - name: Run patch scraper
       run: |
         node scripts/steam-rss-scraper.js
