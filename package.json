@@ -1,0 +1,28 @@
+{
+  "name": "superpatch-gg",
+  "version": "1.0.0",
+  "description": "SUPERVIVE patch notes archive with automated extraction",
+  "main": "scripts/steam-rss-scraper.js",
+  "scripts": {
+    "scrape": "node scripts/steam-rss-scraper.js",
+    "start": "python -m http.server 8000",
+    "test": "node scripts/test-parser.js"
+  },
+  "dependencies": {
+    "natural": "^6.12.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/superpatch.gg.git"
+  },
+  "keywords": [
+    "supervive",
+    "patch-notes",
+    "gaming",
+    "automation"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

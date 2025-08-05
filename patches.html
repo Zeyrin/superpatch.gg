@@ -328,9 +328,6 @@
                 min-width: auto;
             }
 
-            .filter-buttons {
-                justify-content: center;
-            }
 
             .patch-header {
                 flex-direction: column;
@@ -386,14 +383,6 @@
                     >
                     <button class="search-clear" aria-label="Clear search" title="Clear search">×</button>
                 </div>
-                <div class="filter-buttons">
-                    <button class="filter-btn active" data-category="all">All</button>
-                    <button class="filter-btn" data-category="hunters">Hunters</button>
-                    <button class="filter-btn" data-category="equipment">Equipment</button>
-                    <button class="filter-btn" data-category="systems">Systems</button>
-                    <button class="filter-btn" data-category="maps">Maps</button>
-                    <button class="filter-btn" data-category="modes">Modes</button>
-                </div>
             </div>
         </section>
 
@@ -442,7 +431,6 @@
             constructor() {
                 this.patchNotes = [];
                 this.filteredNotes = [];
-                this.currentFilter = 'all';
                 this.currentSearch = '';
                 this.patchDataManager = new PatchDataManager();
                 this.init();
@@ -468,20 +456,10 @@
 
             setupEventListeners() {
                 const searchInput = document.getElementById('searchInput');
-                const filterButtons = document.querySelectorAll('.filter-btn');
 
                 searchInput.addEventListener('input', (e) => {
                     this.currentSearch = e.target.value.toLowerCase();
                     this.filterAndRender();
-                });
-
-                filterButtons.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        filterButtons.forEach(b => b.classList.remove('active'));
-                        e.target.classList.add('active');
-                        this.currentFilter = e.target.dataset.category;
-                        this.filterAndRender();
-                    });
                 });
             }
 
@@ -489,8 +467,10 @@
                 SuperviveUtils.showLoading('patchNotesContainer');
                 try {
                     this.patchNotes = await this.patchDataManager.loadPatches();
+                    
                     // Transform the data to match expected structure
                     this.patchNotes = this.patchNotes.map(note => this.transformPatchData(note));
+                    
                     this.filteredNotes = [...this.patchNotes];
                     SuperviveUtils.hideLoading('patchNotesContainer');
                     this.renderPatchNotes();
@@ -503,13 +483,12 @@
 
             transformPatchData(note) {
                 // Convert new JSON structure to old expected structure
-                const categories = [];
                 const content = {};
                 
-                if (note.changes) {
+                // Handle the case where note might not have changes property
+                if (note.changes && typeof note.changes === 'object') {
                     Object.keys(note.changes).forEach(category => {
-                        if (note.changes[category] && note.changes[category].length > 0) {
-                            categories.push(category);
+                        if (note.changes[category] && Array.isArray(note.changes[category]) && note.changes[category].length > 0) {
                             
                             if (category === 'hunters') {
                                 // Handle hunters - check if they're already objects or just strings
@@ -542,13 +521,19 @@
                             }
                         }
                     });
+                } else if (note.content) {
+                    // Handle old format where content is directly available
+                    Object.keys(note.content).forEach(category => {
+                        if (note.content[category] && note.content[category].length > 0) {
+                            content[category] = note.content[category];
+                        }
+                    });
                 }
                 
                 return {
-                    id: note.id,
-                    title: note.title,
-                    date: note.date,
-                    categories: categories,
+                    id: note.id || `patch-${Date.now()}`,
+                    title: note.title || 'Unknown Patch',
+                    date: note.date || new Date().toISOString().split('T')[0],
                     content: content
                 };
             }
@@ -899,10 +884,10 @@
             }
 
             filterAndRender() {
+                // Filter patch notes by search terms only
                 this.filteredNotes = this.patchNotes.filter(note => {
-                    const matchesCategory = this.currentFilter === 'all' || note.categories.includes(this.currentFilter);
                     const matchesSearch = this.currentSearch === '' || this.matchesSearchTerm(note);
-                    return matchesCategory && matchesSearch;
+                    return matchesSearch;
                 });
 
                 this.renderPatchNotes();
@@ -910,10 +895,9 @@
 
             matchesSearchTerm(note) {
                 const searchableText = [
-                    note.title,
-                    note.date,
-                    ...note.categories,
-                    JSON.stringify(note.content)
+                    note.title || '',
+                    note.date || '',
+                    JSON.stringify(note.content || {})
                 ].join(' ').toLowerCase();
 
                 return searchableText.includes(this.currentSearch);
@@ -951,10 +935,6 @@
                         <div class="patch-header">
                             <h2 class="patch-title">${note.title}</h2>
                             <span class="patch-date">${formattedDate}</span>
-                        </div>
-                        
-                        <div class="patch-categories">
-                            ${note.categories.map(cat => `<span class="category-tag category-${cat}">${cat}</span>`).join('')}
                         </div>
                         
                         <div class="patch-content">
@@ -1076,12 +1056,12 @@
         // Initialize the patch notes manager
         const patchManager = new PatchNotesManager();
 
-        // Check for URL parameters (hunter filter from hunters page)
+        // Check for URL parameters (hunter search from hunters page)
         const urlParams = new URLSearchParams(window.location.search);
-        const hunterFilter = urlParams.get('hunter');
-        if (hunterFilter) {
-            document.getElementById('searchInput').value = hunterFilter;
-            patchManager.currentSearch = hunterFilter.toLowerCase();
+        const hunterSearch = urlParams.get('hunter');
+        if (hunterSearch) {
+            document.getElementById('searchInput').value = hunterSearch;
+            patchManager.currentSearch = hunterSearch.toLowerCase();
             patchManager.filterAndRender();
         }
     </script>

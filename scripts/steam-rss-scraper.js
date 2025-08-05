@@ -1,9 +1,11 @@
-// Steam RSS Scraper for SUPERVIVE Patch Notes
+// Steam RSS Scraper for SUPERVIVE Patch Notes with Smart AI-Free Parsing
 // Run with: node scripts/steam-rss-scraper.js
 
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const SmartFreeParser = require('./smart-parser');
+const HuggingFaceEnhancer = require('./huggingface-integration');
 
 class SteamRssScraper {
     constructor() {
@@ -11,6 +13,12 @@ class SteamRssScraper {
         this.rssUrl = `https://store.steampowered.com/feeds/news/app/${this.appId}/`;
         this.patchesFile = path.join(__dirname, '..', 'assets', 'data', 'patches.json');
         this.lastCheckFile = path.join(__dirname, 'last-check.txt');
+        
+        // Initialize smart parsing
+        this.smartParser = new SmartFreeParser();
+        this.huggingFace = new HuggingFaceEnhancer();
+        
+        console.log('🚀 Steam RSS Scraper initialized with Smart AI-Free Parsing');
     }
 
     // Fetch RSS feed from Steam
@@ -167,8 +175,27 @@ class SteamRssScraper {
             : firstSentence + '.';
     }
 
-    // Parse changes from description with enhanced extraction
-    parseChanges(content) {
+    // Smart AI-Free parsing using multiple techniques
+    async parseChanges(content) {
+        try {
+            console.log('🧠 Using Smart AI-Free Parser...');
+            
+            // Use the smart parser for primary extraction
+            const smartResults = await this.smartParser.parse(content);
+            
+            // Optional: Enhance with Hugging Face if API token available
+            const enhancedResults = await this.huggingFace.enhanceParsing(content, smartResults);
+            
+            return enhancedResults;
+            
+        } catch (error) {
+            console.log('⚠️  Smart parsing failed, using fallback:', error.message);
+            return this.legacyParseChanges(content);
+        }
+    }
+
+    // Legacy parsing as fallback
+    legacyParseChanges(content) {
         const changes = {
             hunters: [],
             equipment: [],

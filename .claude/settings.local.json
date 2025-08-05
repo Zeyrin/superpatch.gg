@@ -15,7 +15,10 @@
       "Bash(dir:*)",
       "Bash(rmdir:*)",
       "Bash(rm:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(npm install)",
+      "Bash(start patches.html)",
+      "Bash(start \"\" \"C:\\Users\\Lohysor\\Desktop\\superpatch.gg\\patches.html\")"
     ],
     "deny": []
   }
