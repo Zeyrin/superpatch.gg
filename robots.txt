@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://zeyrin.github.io/superpatch.gg/sitemap.xml
+
+# Allow search engines to crawl all content
+Allow: /index.html
+Allow: /patches.html
+Allow: /hunters.html
+Allow: /armory.html
+Allow: /assets/
+
+# Crawl delay (be respectful)
+Crawl-delay: 1
