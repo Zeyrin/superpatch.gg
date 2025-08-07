@@ -1,5 +1,152 @@
 [
   {
+    "id": "patch-august-6-2025",
+    "title": "1.01 PATCH NOTES - A New Hunter, New Contracts & Eva Buffs",
+    "date": "2025-08-06",
+    "version": "1.01",
+    "steamUrl": "https://store.steampowered.com/news/app/1283700/view/516342955916656642",
+    "summary": "Tetra joins the Breach as a new Controller, along with seasonal contracts system, Eva buffs, Shiv adjustments, and various balance improvements.",
+    "changes": {
+      "hunters": [
+        {
+          "description": "Tetra - New Controller hunter with stone-shaping abilities including Quake Punch, Volcano Crusher, Landslide, Rockwave, and Tetraform ultimate",
+          "type": "new"
+        },
+        {
+          "description": "Eva: Corrupted Tether damage increased 30/0.07 → 36/0.084, movement speed while using LMB increased 65% → 75%",
+          "type": "buff"
+        },
+        {
+          "description": "Eva: Beckon cooldown decreased 20/16/12 → 18/14/10",
+          "type": "buff"
+        },
+        {
+          "description": "Eva: Base Health increased 1225 → 1290, Health per level increased 73.5 → 77.4, Base Movement Speed increased 465 → 480",
+          "type": "buff"
+        },
+        {
+          "description": "Shiv: Malice and Resolve passive damage decreased by 40%, now correctly applies 2 stacks on Empowered LMB instead of 3",
+          "type": "nerf"
+        },
+        {
+          "description": "Shiv: Quickflip Movement Speed bonus decreased 12/18% → 7/10%, Movement Speed increased 465 → 475",
+          "type": "change"
+        },
+        {
+          "description": "Shiv: REVERTED -32% damage to LMB and Malice and Resolve from previous hotfix",
+          "type": "change"
+        },
+        {
+          "description": "Void: Now has Hazard immunity to Lava in addition to existing partial hazard immunity",
+          "type": "buff"
+        },
+        {
+          "description": "Myth: Fixed issue where Myth would gain Attack Speed when equipping items meant to reduce Attack Speed",
+          "type": "fix"
+        },
+        {
+          "description": "Carbine: Fixed LMB being incorrectly nerfed, reverted to proper damage",
+          "type": "fix"
+        }
+      ],
+      "equipment": [
+        {
+          "description": "Nimbus 180s: Heat Capacity increased +25% → +40%",
+          "type": "buff"
+        },
+        {
+          "description": "Recon Runners: Fixed bug where it wasn't providing intended Movement Speed",
+          "type": "fix"
+        },
+        {
+          "description": "Rocket High-Tops: Dash Speed reduced 25% → 20%",
+          "type": "nerf"
+        },
+        {
+          "description": "Emergency Platform: Added to all in-game stores for better abyss traversal options",
+          "type": "improvement"
+        }
+      ],
+      "systems": [
+        {
+          "description": "Seasonal Contracts: New mission chain system with two contracts per patch, offering prisma rewards and exclusive cosmetics",
+          "type": "new"
+        },
+        {
+          "description": "Forge Crafting Refunds: Players who crafted before cost reductions received prisma refunds via in-game mail",
+          "type": "improvement"
+        },
+        {
+          "description": "Prisma Earn Rates: Gem placement multipliers lowered for top 3 (1.6/1.5/1.4 → 1.45/1.4/1.35), Soul boss gems 60 → 50, Final boss gems 100 → 90",
+          "type": "nerf"
+        },
+        {
+          "description": "Shogi the Metal Knight: Gems dropped reduced from 80 → 30",
+          "type": "nerf"
+        },
+        {
+          "description": "Progress Bar: Updated treatment to make Forge purchase star-up timing clearer",
+          "type": "improvement"
+        },
+        {
+          "description": "Tooltips: Updated out-of-game Armory item tooltips for better clarity and readability",
+          "type": "improvement"
+        },
+        {
+          "description": "Capsule Prisma Sources: Added hover tooltip showing prisma breakdown when received in capsules",
+          "type": "improvement"
+        }
+      ],
+      "maps": [
+        {
+          "description": "Circle Adjustments: Reduced frequency of abyss-flooded final circles",
+          "type": "improvement"
+        },
+        {
+          "description": "Kill Floor Visual: New grid visual added to help visualize the kill floor",
+          "type": "improvement"
+        },
+        {
+          "description": "Mantling: Camera angle adjustments to improve mantling reliability when terrain hides wall distance",
+          "type": "improvement"
+        },
+        {
+          "description": "Skyshark Variants: Now spawn with two fast and two furious color variants",
+          "type": "improvement"
+        }
+      ],
+      "modes": [],
+      "client": [
+        {
+          "description": "Skyshark Keybinds: Added keybinds in Settings Menu for Skysharks",
+          "type": "improvement"
+        },
+        {
+          "description": "Finisher VO: VO now plays in menus when previewing finishers",
+          "type": "improvement"
+        },
+        {
+          "description": "Item Wheel: Fixed item wheel not showing item tooltips",
+          "type": "fix"
+        },
+        {
+          "description": "Weekly Missions: Fixed bug where 'place Top 6 while using unique Equipment' mission wasn't granting progress correctly",
+          "type": "fix"
+        },
+        {
+          "description": "Dupes in Capsules: Fixed bug where duplicate items in Capsules would return insufficient Prisma (minimum now 225)",
+          "type": "fix"
+        },
+        {
+          "description": "Warmup: Fixed bug where spectator view would occasionally appear and skip hero select when finding match while loading into warmup",
+          "type": "fix"
+        }
+      ]
+    },
+    "rawContent": "Tetra joins as new Controller with seasonal contracts system, Eva buffs, Shiv balance changes, and various QoL improvements.",
+    "addedAt": "2025-08-06T08:00:00.000Z"
+  },
+  {
     "id": "patch-july-30-2025",
     "title": "July 30 - Hotfix Patch Notes",
     "date": "2025-07-30",
