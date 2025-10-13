@@ -1,57 +1,251 @@
-name: Auto Patch Scraper
+name: Auto Patch Scraper & Deploy
 
 on:
   schedule:
-    # Run once per day at 9 AM UTC
-    - cron: '0 9 * * *'
+    # Run every 6 hours to catch patches quickly
+    - cron: '0 */6 * * *'
   workflow_dispatch: # Allow manual trigger
-  
+  push:
+    branches:
+      - main
+    paths:
+      - 'assets/data/patches.json'
+      - '*.html'
+      - 'assets/**'
+
 permissions:
   contents: write
+  pages: write
+  id-token: write
+  issues: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   scrape-patches:
     runs-on: ubuntu-latest
-    
+    outputs:
+      changes_detected: ${{ steps.git-check.outputs.changes }}
+      new_patches: ${{ steps.patch-info.outputs.count }}
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        
+        fetch-depth: 0 # Full history for better git operations
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
-        
+        node-version: '20'
+        cache: 'npm'
+
     - name: Install dependencies
-      run: npm install
-        
-    - name: Run patch scraper
+      run: npm ci --prefer-offline
+
+    - name: Backup current data
       run: |
-        node scripts/steam-rss-scraper.js
-        
+        echo "Creating backup of current data..."
+        cp assets/data/patches.json assets/data/patches.json.backup
+        echo "Backup created: patches.json.backup"
+
+    - name: Validate data before scraping
+      run: |
+        echo "Validating current data structure..."
+        node scripts/validate-data.js || echo "⚠️ Current data has validation issues"
+
+    - name: Run patch scraper
+      id: scraper
+      run: |
+        echo "Running Steam RSS scraper..."
+        node scripts/steam-rss-scraper.js 2>&1 | tee scraper-log.txt
+        echo "Scraper completed"
+      continue-on-error: true
+
+    - name: Validate scraped data
+      id: validate
+      run: |
+        echo "Validating scraped data..."
+        if node scripts/validate-data.js; then
+          echo "✅ Data validation passed"
+          echo "valid=true" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Data validation failed"
+          echo "valid=false" >> $GITHUB_OUTPUT
+
+          # Restore backup if validation fails
+          echo "Restoring backup..."
+          mv assets/data/patches.json.backup assets/data/patches.json
+          exit 1
+        fi
+
     - name: Check for changes
       id: git-check
+      if: steps.validate.outputs.valid == 'true'
       run: |
-        git diff --exit-code assets/data/patches.json || echo "changes=true" >> $GITHUB_OUTPUT
-        
-    - name: Create GitHub issue
+        if git diff --quiet assets/data/patches.json; then
+          echo "No changes detected"
+          echo "changes=false" >> $GITHUB_OUTPUT
+        else
+          echo "Changes detected!"
+          echo "changes=true" >> $GITHUB_OUTPUT
+
+          # Show what changed
+          echo "Diff preview:"
+          git diff assets/data/patches.json | head -100
+        fi
+
+    - name: Extract patch information
+      id: patch-info
       if: steps.git-check.outputs.changes == 'true'
+      run: |
+        # Count new patches (this is a simple count, could be improved)
+        COUNT=$(git diff assets/data/patches.json | grep -c '^\+.*"title":' || echo "0")
+        echo "count=$COUNT" >> $GITHUB_OUTPUT
+        echo "Detected $COUNT new patches"
+
+    - name: Configure git
+      if: steps.git-check.outputs.changes == 'true'
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Commit and push changes
+      if: steps.git-check.outputs.changes == 'true'
+      run: |
+        git add assets/data/patches.json scripts/last-check.txt
+        git commit -m "🎮 Auto-update: New SUPERVIVE patch data detected
+
+        - Scraped from Steam RSS feed
+        - Updated at: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+        - Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+        Co-Authored-By: superpatch-bot <github-actions[bot]@users.noreply.github.com>"
+
+        git push
+
+    - name: Upload scraper logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: scraper-logs
+        path: scraper-log.txt
+        retention-days: 7
+
+    - name: Create success notification issue
+      if: steps.git-check.outputs.changes == 'true' && success()
       uses: actions/github-script@v7
       with:
         script: |
-          github.rest.issues.create({
+          const patchCount = '${{ steps.patch-info.outputs.count }}';
+          const runUrl = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+
+          await github.rest.issues.create({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            title: '🎮 New Supervive Patch Detected - Manual Update Needed',
-            body: `New patch data has been detected from the Steam RSS feed!
-            
-            **Action Required:** Please review and manually update the patch notes.
-            
-            **Workflow Run:** ${context.payload.repository.html_url}/actions/runs/${context.runId}
-            **Detection Time:** ${new Date().toISOString()}
-            
-            Please check the latest patch data and update the site accordingly.`,
-            labels: ['patch-update', 'manual-review']
-          })
+            title: `✅ New SUPERVIVE Patch Data Auto-Updated (${patchCount} patches)`,
+            body: `## 🎮 Patch Data Successfully Updated!
+
+            **Patches Detected:** ${patchCount} new patch(es)
+            **Updated At:** ${new Date().toISOString()}
+            **Status:** ✅ Automatically committed and deployed
+
+            ### 📊 Details
+            - Data scraped from Steam RSS feed
+            - Committed to main branch
+            - Site will be deployed automatically
+
+            ### 🔗 Links
+            - [Workflow Run](${runUrl})
+            - [View Changes](https://github.com/${{ github.repository }}/commits/main)
+            - [Live Site](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)
+
+            ### ✅ Next Steps
+            The site should be live with the new data within a few minutes!
+
+            ---
+            *This is an automated notification from the patch scraper workflow.*`,
+            labels: ['auto-update', 'patch-data', 'success']
+          });
+
+    - name: Create failure notification
+      if: failure()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const runUrl = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+
+          await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: '❌ Patch Scraper Failed - Manual Intervention Required',
+            body: `## ⚠️ Patch Scraper Workflow Failed
+
+            **Time:** ${new Date().toISOString()}
+            **Status:** ❌ Failed
+
+            ### 🔍 Error Details
+            The automated patch scraper encountered an error and could not complete successfully.
+
+            ### 🔗 Debug Information
+            - [Failed Workflow Run](${runUrl})
+            - [View Logs](${runUrl}#artifacts)
+
+            ### 🛠️ Troubleshooting Steps
+            1. Check the workflow logs for specific error messages
+            2. Verify the Steam RSS feed is accessible
+            3. Ensure all dependencies are properly installed
+            4. Check if the scraper script needs updates
+
+            ### 📝 Manual Actions Required
+            - Review the error logs
+            - Fix any issues in the scraper
+            - Re-run the workflow manually if needed
+
+            ---
+            *This is an automated failure notification.*`,
+            labels: ['bug', 'patch-scraper', 'manual-review']
+          });
+
+  # Deploy to GitHub Pages
+  deploy:
+    needs: scrape-patches
+    # Run if changes were detected OR if this is a manual push to main
+    if: |
+      (needs.scrape-patches.outputs.changes_detected == 'true') ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: main # Ensure we get the latest commit
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.'
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+    - name: Deployment success comment
+      if: success() && needs.scrape-patches.outputs.changes_detected == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const url = '${{ steps.deployment.outputs.page_url }}';
+          console.log(`🚀 Successfully deployed to ${url}`)

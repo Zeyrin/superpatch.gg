@@ -1,0 +1,150 @@
+name: Site Health Check
+
+on:
+  schedule:
+    # Run every day at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    name: Check site health and data integrity
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Validate patches.json structure
+        id: validate-json
+        run: |
+          echo "Validating patches.json..."
+
+          # Check if file exists
+          if [ ! -f "assets/data/patches.json" ]; then
+            echo "❌ patches.json not found!"
+            echo "status=fail" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Check if valid JSON
+          if ! jq empty assets/data/patches.json 2>/dev/null; then
+            echo "❌ patches.json is not valid JSON!"
+            echo "status=fail" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Count patches
+          PATCH_COUNT=$(jq 'length' assets/data/patches.json)
+          echo "✅ Found $PATCH_COUNT patches"
+          echo "patch_count=$PATCH_COUNT" >> $GITHUB_OUTPUT
+
+          # Check for required fields in first patch
+          FIRST_PATCH=$(jq '.[0]' assets/data/patches.json)
+
+          for field in id title date version steamUrl summary changes; do
+            if ! echo "$FIRST_PATCH" | jq -e ".$field" > /dev/null; then
+              echo "❌ Missing required field: $field"
+              echo "status=fail" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+          done
+
+          echo "✅ All validation checks passed!"
+          echo "status=pass" >> $GITHUB_OUTPUT
+
+      - name: Check site accessibility
+        id: check-site
+        run: |
+          SITE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          echo "Checking site: $SITE_URL"
+
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL")
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Site is accessible (HTTP $HTTP_CODE)"
+            echo "site_status=online" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ Site returned HTTP $HTTP_CODE"
+            echo "site_status=offline" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check Steam RSS feed
+        id: check-rss
+        run: |
+          RSS_URL="https://store.steampowered.com/feeds/news/app/1283700/"
+          echo "Checking Steam RSS feed..."
+
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$RSS_URL")
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Steam RSS feed is accessible"
+            echo "rss_status=online" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ Steam RSS feed returned HTTP $HTTP_CODE"
+            echo "rss_status=offline" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate health report
+        run: |
+          echo "## 🏥 Health Check Report" >> health-report.md
+          echo "" >> health-report.md
+          echo "**Date:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> health-report.md
+          echo "" >> health-report.md
+          echo "### Data Validation" >> health-report.md
+          echo "- JSON Status: ${{ steps.validate-json.outputs.status }}" >> health-report.md
+          echo "- Patch Count: ${{ steps.validate-json.outputs.patch_count }}" >> health-report.md
+          echo "" >> health-report.md
+          echo "### Site Status" >> health-report.md
+          echo "- GitHub Pages: ${{ steps.check-site.outputs.site_status }}" >> health-report.md
+          echo "- Steam RSS Feed: ${{ steps.check-rss.outputs.rss_status }}" >> health-report.md
+
+          cat health-report.md
+
+      - name: Create issue if health check fails
+        if: steps.validate-json.outputs.status == 'fail' || steps.check-site.outputs.site_status == 'offline' || steps.check-rss.outputs.rss_status == 'offline'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('health-report.md', 'utf8');
+            const runUrl = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '⚠️ Site Health Check Failed',
+              body: `${report}
+
+              ### 🔍 Details
+              One or more health checks have failed. Please review the workflow logs for more information.
+
+              ### 🔗 Links
+              - [Workflow Run](${runUrl})
+              - [View Repository](https://github.com/${{ github.repository }})
+
+              ---
+              *Automated health check notification*`,
+              labels: ['health-check', 'monitoring', 'needs-attention']
+            });
+
+      - name: Upload health report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-report
+          path: health-report.md
+          retention-days: 30

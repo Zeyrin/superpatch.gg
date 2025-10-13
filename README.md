@@ -3,6 +3,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen)](https://zeyrin.github.io/superpatch.gg/)
 [![Game: SUPERVIVE](https://img.shields.io/badge/Game-SUPERVIVE-orange.svg)](https://store.steampowered.com/app/1283700/SUPERVIVE/)
+[![Auto Scraper](https://github.com/Zeyrin/superpatch.gg/actions/workflows/auto-patch-scraper.yml/badge.svg)](https://github.com/Zeyrin/superpatch.gg/actions/workflows/auto-patch-scraper.yml)
+[![Deploy](https://github.com/Zeyrin/superpatch.gg/actions/workflows/deploy.yml/badge.svg)](https://github.com/Zeyrin/superpatch.gg/actions/workflows/deploy.yml)
+[![Health Check](https://github.com/Zeyrin/superpatch.gg/actions/workflows/health-check.yml/badge.svg)](https://github.com/Zeyrin/superpatch.gg/actions/workflows/health-check.yml)
 
 > The ultimate archive for SUPERVIVE patch notes, hunter guides, and game updates
 
@@ -86,9 +89,11 @@ npm test
 ## 📈 Key Features
 
 ### Automated Patch Extraction
-- **RSS Integration**: Monitors Steam news feeds for SUPERVIVE updates
+- **RSS Integration**: Monitors Steam news feeds for SUPERVIVE updates every 6 hours
 - **Smart Parsing**: AI-powered content extraction and categorization
 - **Real-time Updates**: Automatic synchronization with official patch notes
+- **GitHub Actions**: Fully automated workflow for data collection and deployment
+- **Health Monitoring**: Daily checks ensure site and data integrity
 
 ### Modern Web Experience
 - **Responsive Design**: Optimized for desktop, tablet, and mobile
@@ -107,6 +112,34 @@ npm test
 - **Hunter Count**: 23 unique hunters with complete ability sets
 - **Armory Items**: Full collection with visual assets
 - **Historical Data**: Complete patch archive since game launch
+
+## 🤖 Automation & CI/CD
+
+This project uses **GitHub Actions** for full automation:
+
+### 🔄 Auto Patch Scraper
+- Runs every 6 hours (0:00, 6:00, 12:00, 18:00 UTC)
+- Fetches latest patches from Steam RSS
+- Automatically commits new data
+- Deploys updates to GitHub Pages
+- Creates GitHub Issues for new patches
+
+### 🚀 Deployment
+- Automatic deployment on push to main
+- Manual deployment via Actions tab
+- Zero-downtime updates
+- CDN cache management
+
+### 🏥 Health Monitoring
+- Daily health checks at midnight UTC
+- Validates JSON data structure
+- Monitors site accessibility
+- Checks Steam RSS feed status
+- Creates alerts for failures
+
+**View Workflow Status:** [Actions Tab](https://github.com/Zeyrin/superpatch.gg/actions)
+
+**Setup Instructions:** [Workflows Documentation](.github/workflows/README.md)
 
 ## 🤝 Contributing
 
